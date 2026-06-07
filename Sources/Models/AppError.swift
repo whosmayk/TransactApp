@@ -14,7 +14,7 @@ public struct AppError: LocalizedError, Identifiable, Equatable, Sendable {
     public let suggestion: String?
     public let source: ErrorSource
 
-    public enum ErrorSource: Equatable {
+    public enum ErrorSource: Equatable, Sendable {
         case database
         case backup
         case importacion
