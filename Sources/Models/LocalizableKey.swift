@@ -512,33 +512,20 @@ public enum LocalizableKey: String, Sendable, CaseIterable {
 }
 
 private let i18nBundle: Bundle = {
-    let bundleName = "TransactApp_Models"
-    let main = Bundle.main
-
-    // Path inside a macOS .app bundle (Contents/Resources/TransactApp_Models.bundle)
-    if let rsrc = main.resourcePath {
-        let appPath = "\(rsrc)/\(bundleName).bundle"
+    // Bundle.module (SPM-generated) busca en la raíz del .app y en la ruta absoluta de build.
+    // En producción, build-app.sh copia el bundle a la raíz del .app para que funcione.
+    let mainPath = Bundle.main.bundleURL.appendingPathComponent("TransactApp_Models.bundle").path
+    if let bundle = Bundle(path: mainPath) { return bundle }
+    if let rsrc = Bundle.main.resourcePath {
+        let appPath = "\(rsrc)/TransactApp_Models.bundle"
         if let bundle = Bundle(path: appPath) { return bundle }
     }
-
-    // SPM build products (dev / CI)
-    let candidates = [
-        main.bundlePath + "/\(bundleName).bundle",
-        main.bundlePath + "/../\(bundleName).bundle",
-        main.bundlePath + "/../../\(bundleName).bundle",
-    ]
-    for path in candidates {
-        if let bundle = Bundle(path: path) { return bundle }
-    }
-
-    var dir = main.bundleURL
+    var dir = Bundle.main.bundleURL
     for _ in 0..<12 {
         dir = dir.deletingLastPathComponent()
-        let testPath = dir.appendingPathComponent("\(bundleName).bundle")
-        if let bundle = Bundle(url: testPath) { return bundle }
+        if let bundle = Bundle(url: dir.appendingPathComponent("TransactApp_Models.bundle")) { return bundle }
     }
-
-    return main
+    return Bundle.main
 }()
 
 public extension LocalizableKey {

@@ -44,6 +44,9 @@ for candidate in \
     "$PROJECT_ROOT/.build/x86_64-apple-macosx/$CONFIG/TransactApp_Models.bundle"; do
     if [ -d "$candidate" ]; then
         cp -R "$candidate" "$APP_DIR/Contents/Resources/"
+        # SPM-generated Bundle.module busca en la raíz del .app, no en Contents/Resources/
+        # Copiamos también ahí como fallback
+        cp -R "$candidate" "$APP_DIR/"
         echo "✓ Bundle de recursos i18n copiado desde $candidate"
         break
     fi
