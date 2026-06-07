@@ -131,12 +131,18 @@ struct FormularioSuscripcionView: View {
                     .font(Tipografia.cuerpo())
                     .foregroundColor(AppColor.subtext1)
                 Spacer()
-                TextField(LocalizableKey.formSubDuracionIndefinida.localized(), text: $viewModel.duracionMesesTexto)
-                    .textFieldStyle(.plain)
-                    .multilineTextAlignment(.trailing)
-                    .frame(width: 80)
+                TextField("", text: $viewModel.duracionMesesTexto)
+                    .textFieldStyle(.roundedBorder)
+                    .multilineTextAlignment(.center)
+                    .frame(width: 64)
                     .font(Tipografia.cuerpo())
                     .foregroundColor(AppColor.text)
+                if viewModel.duracionMesesTexto.isEmpty {
+                    Text(LocalizableKey.formSubDuracionIndefinida.localized())
+                        .font(Tipografia.cuerpo())
+                        .foregroundColor(AppColor.subtext0)
+                        .fixedSize()
+                }
             }
             Toggle(LocalizableKey.formSubActiva.localized(), isOn: $viewModel.activa)
         } footer: {

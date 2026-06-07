@@ -75,45 +75,60 @@ struct GestionSuscripcionesView: View {
 
     private var resumen: some View {
         HStack(spacing: TemaEspaciado.m) {
-            CardView {
-                VStack(alignment: .leading, spacing: TemaEspaciado.s) {
-                    Text(LocalizableKey.susResumenMensual.localized())
-                        .font(Tipografia.subtitulo())
-                        .foregroundColor(AppColor.subtext1)
-                    MontoLabel(
-                        monto: viewModel.totalMensual,
-                        tamanio: .mediano,
-                        colorearSegunSigno: false
-                    )
-                    Text(LocalizableKey.susResumenActivas.localized(viewModel.activas))
-                        .font(Tipografia.cuerpo())
-                        .foregroundColor(AppColor.subtext0)
-                }
-            }
-            CardView {
-                VStack(alignment: .leading, spacing: TemaEspaciado.s) {
-                    Text(LocalizableKey.susResumenPorVencer.localized())
-                        .font(Tipografia.subtitulo())
-                        .foregroundColor(AppColor.subtext1)
-                    HStack(alignment: .firstTextBaseline, spacing: TemaEspaciado.xs) {
-                        Text(LocalizableKey.susResumenProximas.localized(viewModel.proximas))
-                            .font(Tipografia.montoGrande())
-                            .foregroundColor(
-                                viewModel.proximas > 0
-                                ? AppColor.peach
-                                : AppColor.text
-                            )
-                        Text(LocalizableKey.susResumenProximasLabel.localized())
-                            .font(Tipografia.cuerpo())
-                            .foregroundColor(AppColor.subtext0)
-                    }
-                    Text(LocalizableKey.susResumen3dias.localized())
-                        .font(Tipografia.cuerpo())
-                        .foregroundColor(AppColor.subtext0)
-                }
-            }
+            cardResumen(
+                contenido: LocalizableKey.susResumenMensual.localized(),
+                monto: viewModel.totalMensual,
+                pie: LocalizableKey.susResumenActivas.localized(viewModel.activas)
+            )
+            cardResumen(
+                contenido: LocalizableKey.susResumenPorVencer.localized(),
+                numeroGrande: viewModel.proximas,
+                etiquetaNumero: LocalizableKey.susResumenProximasLabel.localized(),
+                pie: LocalizableKey.susResumen3dias.localized()
+            )
         }
         .padding(TemaEspaciado.l)
+    }
+
+    @ViewBuilder
+    private func cardResumen(
+        contenido: String,
+        monto: Decimal? = nil,
+        numeroGrande: Int? = nil,
+        etiquetaNumero: String? = nil,
+        pie: String
+    ) -> some View {
+        VStack(alignment: .leading, spacing: TemaEspaciado.s) {
+            Text(contenido)
+                .font(Tipografia.subtitulo())
+                .foregroundColor(AppColor.subtext1)
+            if let monto {
+                MontoLabel(monto: monto, tamanio: .mediano, colorearSegunSigno: false)
+            }
+            if let n = numeroGrande, let etiqueta = etiquetaNumero {
+                HStack(alignment: .firstTextBaseline, spacing: TemaEspaciado.xs) {
+                    Text(LocalizableKey.susResumenProximas.localized(n))
+                        .font(Tipografia.montoMediano())
+                        .foregroundColor(n > 0 ? AppColor.peach : AppColor.text)
+                    Text(etiqueta)
+                        .font(Tipografia.cuerpo())
+                        .foregroundColor(AppColor.subtext0)
+                }
+            }
+            Text(pie)
+                .font(Tipografia.cuerpo())
+                .foregroundColor(AppColor.subtext0)
+        }
+        .padding(TemaEspaciado.l)
+        .frame(maxWidth: .infinity, alignment: .topLeading)
+        .background(
+            RoundedRectangle(cornerRadius: TemaRadio.m, style: .continuous)
+                .fill(AppGradiente.surface)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: TemaRadio.m, style: .continuous)
+                .strokeBorder(AppColor.surface1, lineWidth: 1)
+        )
     }
 
     private var filtros: some View {

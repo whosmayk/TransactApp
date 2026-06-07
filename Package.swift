@@ -71,6 +71,16 @@ let package = Package(
                 .product(name: "GRDB", package: "GRDB.swift")
             ],
             path: "Sources/Seeder"
+        ),
+        .executableTarget(
+            name: "ScreenshotSeeder",
+            dependencies: [
+                "Models",
+                "Database",
+                "Services",
+                .product(name: "GRDB", package: "GRDB.swift")
+            ],
+            path: "Sources/ScreenshotSeeder"
         )
     ],
     swiftLanguageModes: [.v6]

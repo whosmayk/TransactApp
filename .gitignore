@@ -49,6 +49,9 @@ Icon
 # Generated
 *.generated.swift
 
+# Screenshots / demo database
+screenshots/
+
 # Development documentation (not shipped)
 /ANALISIS_REVERSE_ENGINEERING.md
 /PLAN_IMPLEMENTACION_SWIFT.md

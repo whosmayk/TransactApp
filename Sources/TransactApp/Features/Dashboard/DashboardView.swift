@@ -514,6 +514,7 @@ private struct TarjetaSaldo: View {
                     }
                 }
             }
+            .frame(maxHeight: .infinity)
         }
         .overlay(alignment: .topTrailing) {
             if let accion {
