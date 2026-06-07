@@ -58,6 +58,7 @@ screenshots/
 /PLAN_IMPLEMENTACION_SWIFT.md
 /Paleta_Colores.md
 /docs/*.md
+/report_crash.md
 
 # Developer utilities
 /scripts/cargar-demo.swift
