@@ -512,19 +512,41 @@ public enum LocalizableKey: String, Sendable, CaseIterable {
 }
 
 private let i18nBundle: Bundle = {
-    // En test/CI (swift test), Bundle.main apunta al toolchain de SPM.
-    // Bundle.module (SPM-generated) tiene la ruta absoluta del build y funciona.
-    // En producción (.app bundle descargado), Bundle.module crashea porque busca en la raíz.
-    // Usamos Contents/Resources/ (donde build-app.sh copia el bundle).
-    if Bundle.main.bundlePath.contains("swift") {
+    let fm = FileManager.default
+    let name = "TransactApp_Models.bundle"
+
+    // 1) Production macOS .app (Contents/Resources/)
+    if let rsrc = Bundle.main.resourcePath {
+        let p = "\(rsrc)/\(name)"
+        if fm.fileExists(atPath: p) { return Bundle(path: p)! }
+    }
+
+    // 2) SPM path 1: main bundle child
+    let p1 = Bundle.main.bundleURL.appendingPathComponent(name).path
+    if fm.fileExists(atPath: p1) { return Bundle(path: p1)! }
+
+    // 3) SPM build products relative to CWD (works during `swift test`)
+    for arch in ["arm64-apple-macosx", "x86_64-apple-macosx"] {
+        for cfg in ["debug", "release"] {
+            let p = "\(fm.currentDirectoryPath)/.build/\(arch)/\(cfg)/\(name)"
+            if fm.fileExists(atPath: p) { return Bundle(path: p)! }
+        }
+    }
+
+    // 4) Walk up from Bundle.main (covers some toolchain paths)
+    var dir = Bundle.main.bundleURL
+    for _ in 0..<15 {
+        dir = dir.deletingLastPathComponent()
+        let p = dir.appendingPathComponent(name)
+        if fm.fileExists(atPath: p.path) { return Bundle(url: p)! }
+    }
+
+    // 5) Last resort: Bundle.module (has hardcoded absolute build path from compile time)
+    // Only safe when the bundle exists at the SPM build location (dev/CI, not production)
+    if fm.fileExists(atPath: p1) || fm.currentDirectoryPath.contains(".build") {
         return Bundle.module
     }
-    if let rsrc = Bundle.main.resourcePath {
-        let appPath = "\(rsrc)/TransactApp_Models.bundle"
-        if let bundle = Bundle(path: appPath) { return bundle }
-    }
-    let mainPath = Bundle.main.bundleURL.appendingPathComponent("TransactApp_Models.bundle").path
-    if let bundle = Bundle(path: mainPath) { return bundle }
+
     return Bundle.main
 }()
 
