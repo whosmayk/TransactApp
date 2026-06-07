@@ -511,9 +511,19 @@ public enum LocalizableKey: String, Sendable, CaseIterable {
     case updatesActualizado = "updates.actualizado"
 }
 
+private let i18nBundle: Bundle = {
+    let candidates: [Bundle] = [
+        Bundle.main,
+        Bundle(path: Bundle.main.bundlePath + "/Contents/Resources/TransactApp_Models.bundle"),
+        Bundle(path: Bundle.main.bundlePath + "/../Resources/TransactApp_Models.bundle"),
+        Bundle(path: Bundle.main.bundlePath + "/TransactApp_Models.bundle"),
+    ].compactMap { $0 }
+    return candidates.first ?? Bundle.main
+}()
+
 public extension LocalizableKey {
     func localized(_ args: CVarArg...) -> String {
-        let format = Bundle.module.localizedString(forKey: rawValue, value: rawValue, table: nil)
+        let format = i18nBundle.localizedString(forKey: rawValue, value: rawValue, table: nil)
         if args.isEmpty {
             return format
         }
@@ -524,7 +534,7 @@ public extension LocalizableKey {
 }
 
 public func Localized(_ key: LocalizableKey, _ args: CVarArg...) -> String {
-    let format = Bundle.module.localizedString(forKey: key.rawValue, value: key.rawValue, table: nil)
+    let format = i18nBundle.localizedString(forKey: key.rawValue, value: key.rawValue, table: nil)
     if args.isEmpty {
         return format
     }

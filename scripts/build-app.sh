@@ -36,12 +36,20 @@ chmod +x "$APP_DIR/Contents/MacOS/TransactApp"
 cp "$PROJECT_ROOT/build/AppIcon.icns" "$APP_DIR/Contents/Resources/AppIcon.icns"
 
 # Copiar el bundle de recursos del módulo Models (Localizable.strings)
-MODELS_BUNDLE="$BIN_DIR/TransactApp_Models.bundle"
-if [ -d "$MODELS_BUNDLE" ]; then
-    cp -R "$MODELS_BUNDLE" "$APP_DIR/Contents/Resources/"
-    echo "✓ Bundle de recursos i18n copiado"
-else
-    echo "⚠ No se encontró $MODELS_BUNDLE (Localizable.strings no estarán disponibles)"
+# Buscar en posibles rutas (varía según versión de Swift/SPM)
+for candidate in \
+    "$BIN_DIR/TransactApp_Models.bundle" \
+    "$PROJECT_ROOT/.build/plugins/outputs/TransactApp_Models/TransactApp_Models.bundle" \
+    "$PROJECT_ROOT/.build/arm64-apple-macosx/$CONFIG/TransactApp_Models.bundle" \
+    "$PROJECT_ROOT/.build/x86_64-apple-macosx/$CONFIG/TransactApp_Models.bundle"; do
+    if [ -d "$candidate" ]; then
+        cp -R "$candidate" "$APP_DIR/Contents/Resources/"
+        echo "✓ Bundle de recursos i18n copiado desde $candidate"
+        break
+    fi
+done
+if [ ! -d "$APP_DIR/Contents/Resources/TransactApp_Models.bundle" ]; then
+    echo "⚠ No se encontró TransactApp_Models.bundle (Localizable.strings se leerán del main bundle)"
 fi
 
 echo "✓ Bundle creado: $APP_DIR"
