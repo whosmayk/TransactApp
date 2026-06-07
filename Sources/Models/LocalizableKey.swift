@@ -511,7 +511,35 @@ public enum LocalizableKey: String, Sendable, CaseIterable {
     case updatesActualizado = "updates.actualizado"
 }
 
-private let i18nBundle = Bundle.module
+private let i18nBundle: Bundle = {
+    let bundleName = "TransactApp_Models"
+    let main = Bundle.main
+
+    // Path inside a macOS .app bundle (Contents/Resources/TransactApp_Models.bundle)
+    if let rsrc = main.resourcePath {
+        let appPath = "\(rsrc)/\(bundleName).bundle"
+        if let bundle = Bundle(path: appPath) { return bundle }
+    }
+
+    // SPM build products (dev / CI)
+    let candidates = [
+        main.bundlePath + "/\(bundleName).bundle",
+        main.bundlePath + "/../\(bundleName).bundle",
+        main.bundlePath + "/../../\(bundleName).bundle",
+    ]
+    for path in candidates {
+        if let bundle = Bundle(path: path) { return bundle }
+    }
+
+    var dir = main.bundleURL
+    for _ in 0..<12 {
+        dir = dir.deletingLastPathComponent()
+        let testPath = dir.appendingPathComponent("\(bundleName).bundle")
+        if let bundle = Bundle(url: testPath) { return bundle }
+    }
+
+    return main
+}()
 
 public extension LocalizableKey {
     func localized(_ args: CVarArg...) -> String {
