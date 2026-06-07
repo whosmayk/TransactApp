@@ -61,7 +61,7 @@ enum UpdateInstaller {
         proc.arguments = [scriptURL.path]
         try proc.run()
 
-        NSApplication.shared.terminate(nil)
+        Task { @MainActor in NSApplication.shared.terminate(nil) }
     }
 }
 
