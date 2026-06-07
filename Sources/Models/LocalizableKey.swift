@@ -511,31 +511,7 @@ public enum LocalizableKey: String, Sendable, CaseIterable {
     case updatesActualizado = "updates.actualizado"
 }
 
-private let i18nBundle: Bundle = {
-    let bundleName = "TransactApp_Models"
-
-    let main = Bundle.main
-    let paths: [String] = [
-        main.bundlePath + "/Contents/Resources/\(bundleName).bundle",
-        main.bundlePath + "/\(bundleName).bundle",
-        main.bundlePath + "/Resources/\(bundleName).bundle",
-        main.bundlePath + "/../\(bundleName).bundle",
-        main.bundlePath + "/../../\(bundleName).bundle",
-        main.bundlePath + "/../../../\(bundleName).bundle",
-    ]
-    for path in paths {
-        if let bundle = Bundle(path: path) { return bundle }
-    }
-
-    var dir = main.bundleURL
-    for _ in 0..<12 {
-        dir = dir.deletingLastPathComponent()
-        let testPath = dir.appendingPathComponent("\(bundleName).bundle")
-        if let bundle = Bundle(url: testPath) { return bundle }
-    }
-
-    return main
-}()
+private let i18nBundle = Bundle.module
 
 public extension LocalizableKey {
     func localized(_ args: CVarArg...) -> String {
@@ -558,3 +534,4 @@ public func Localized(_ key: LocalizableKey, _ args: CVarArg...) -> String {
         NSString(format: format, arguments: ptr) as String
     }
 }
+class _I18NBundle {}
