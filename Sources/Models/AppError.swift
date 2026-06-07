@@ -1,7 +1,7 @@
 import Foundation
 
-public struct AppError: LocalizedError, Identifiable, Equatable {
-    public enum Category: Equatable {
+public struct AppError: LocalizedError, Identifiable, Equatable, Sendable {
+    public enum Category: Equatable, Sendable {
         case info
         case warning
         case critical
