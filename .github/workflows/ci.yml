@@ -29,6 +29,6 @@ jobs:
         run: swift build -v
 
       - name: Run tests
-        env:
-          LANG: es_MX.UTF-8
-        run: swift test -v
+        run: |
+          defaults write -g AppleLanguages -array es
+          swift test -v
