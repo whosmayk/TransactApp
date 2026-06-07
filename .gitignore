@@ -1,0 +1,60 @@
+# Xcode
+build/
+DerivedData/
+*.xcodeproj/
+*.xcworkspace/
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+*.xccheckout
+
+# Swift Package Manager
+.swiftpm/
+.build/
+Packages/
+
+# Backup / fixture DB
+*_Backup_*.db
+
+# CocoaPods (not used but defensive)
+Pods/
+
+# Carthage
+Carthage/Build/
+
+# fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*~
+
+# Logs
+*.log
+
+# Test outputs
+*.xcresult/
+
+# Generated
+*.generated.swift
+
+# Development documentation (not shipped)
+/ANALISIS_REVERSE_ENGINEERING.md
+/PLAN_IMPLEMENTACION_SWIFT.md
+/Paleta_Colores.md
+/docs/*.md
+
+# Developer utilities
+/scripts/cargar-demo.swift
+/scripts/run-app.sh

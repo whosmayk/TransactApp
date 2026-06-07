@@ -1,0 +1,62 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    name: Build & Package Release
+    runs-on: macos-14
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Show toolchain
+        run: |
+          sw_vers
+          swift --version
+
+      - name: Resolve dependencies
+        run: swift package resolve
+
+      - name: Build release
+        run: swift build -c release
+
+      - name: Assemble .app bundle
+        run: bash scripts/build-app.sh release
+
+      - name: Ad-hoc sign
+        run: codesign --deep --force -s - build/TransactApp.app
+
+      - name: Package .zip
+        run: |
+          cd build
+          ditto -c -k --sequesterRsrc --keepParent TransactApp.app TransactApp.zip
+
+      - name: Generate appcast
+        env:
+          VERSION: ${{ github.ref_name }}
+        run: |
+          VERSION_CLEAN="${VERSION#v}"
+          bash scripts/generate-appcast.sh "$VERSION_CLEAN" \
+            "https://github.com/${{ github.repository }}/releases/download/$VERSION/TransactApp.zip" \
+            "Ver changelog en el release."
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          body_path: docs/appcast.json
+          files: build/TransactApp.zip
+
+      - name: Deploy appcast to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+          destination_dir: .
+          keep_files: false
