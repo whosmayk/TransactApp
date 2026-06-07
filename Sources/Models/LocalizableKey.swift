@@ -512,19 +512,19 @@ public enum LocalizableKey: String, Sendable, CaseIterable {
 }
 
 private let i18nBundle: Bundle = {
-    // Bundle.module (SPM-generated) busca en la raíz del .app y en la ruta absoluta de build.
-    // En producción, build-app.sh copia el bundle a la raíz del .app para que funcione.
-    let mainPath = Bundle.main.bundleURL.appendingPathComponent("TransactApp_Models.bundle").path
-    if let bundle = Bundle(path: mainPath) { return bundle }
+    // En test/CI (swift test), Bundle.main apunta al toolchain de SPM.
+    // Bundle.module (SPM-generated) tiene la ruta absoluta del build y funciona.
+    // En producción (.app bundle descargado), Bundle.module crashea porque busca en la raíz.
+    // Usamos Contents/Resources/ (donde build-app.sh copia el bundle).
+    if Bundle.main.bundlePath.contains("swift") {
+        return Bundle.module
+    }
     if let rsrc = Bundle.main.resourcePath {
         let appPath = "\(rsrc)/TransactApp_Models.bundle"
         if let bundle = Bundle(path: appPath) { return bundle }
     }
-    var dir = Bundle.main.bundleURL
-    for _ in 0..<12 {
-        dir = dir.deletingLastPathComponent()
-        if let bundle = Bundle(url: dir.appendingPathComponent("TransactApp_Models.bundle")) { return bundle }
-    }
+    let mainPath = Bundle.main.bundleURL.appendingPathComponent("TransactApp_Models.bundle").path
+    if let bundle = Bundle(path: mainPath) { return bundle }
     return Bundle.main
 }()
 
