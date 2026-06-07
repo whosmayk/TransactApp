@@ -512,13 +512,26 @@ public enum LocalizableKey: String, Sendable, CaseIterable {
 }
 
 private let i18nBundle: Bundle = {
-    let candidates: [Bundle] = [
-        Bundle.main,
-        Bundle(path: Bundle.main.bundlePath + "/Contents/Resources/TransactApp_Models.bundle"),
-        Bundle(path: Bundle.main.bundlePath + "/../Resources/TransactApp_Models.bundle"),
-        Bundle(path: Bundle.main.bundlePath + "/TransactApp_Models.bundle"),
-    ].compactMap { $0 }
-    return candidates.first ?? Bundle.main
+    let bundleName = "TransactApp_Models"
+    let main = Bundle.main
+    var candidates = [
+        main.bundlePath + "/Contents/Resources/\(bundleName).bundle",
+        main.bundlePath + "/\(bundleName).bundle",
+        main.bundlePath + "/../\(bundleName).bundle",
+        main.bundlePath + "/Resources/\(bundleName).bundle",
+    ]
+    if let rsrc = main.resourcePath {
+        candidates += [
+            "\(rsrc)/\(bundleName).bundle",
+            "\(rsrc)/../\(bundleName).bundle",
+            "\(rsrc)/../../\(bundleName).bundle",
+            "\(rsrc)/../../../\(bundleName).bundle",
+        ]
+    }
+    for path in candidates {
+        if let bundle = Bundle(path: path) { return bundle }
+    }
+    return main
 }()
 
 public extension LocalizableKey {
