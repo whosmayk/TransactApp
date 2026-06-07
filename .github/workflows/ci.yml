@@ -16,14 +16,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Swift
-        uses: swift-actions/setup-swift@v2
-        with:
-          swift-version: "6.0.0"
+      - name: Select Xcode 16 (Swift 6)
+        run: |
+          ls /Applications | grep Xcode
+          sudo xcode-select -s /Applications/Xcode_16.app/Contents/Developer 2>/dev/null || \
+          sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 
       - name: Show toolchain
         run: |
           sw_vers
+          xcodebuild -version
           swift --version
 
       - name: Resolve dependencies
