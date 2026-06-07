@@ -54,6 +54,7 @@ screenshots/
 
 # Development documentation (not shipped)
 /ANALISIS_REVERSE_ENGINEERING.md
+/AGENTS.md
 /PLAN_IMPLEMENTACION_SWIFT.md
 /Paleta_Colores.md
 /docs/*.md
