@@ -513,24 +513,27 @@ public enum LocalizableKey: String, Sendable, CaseIterable {
 
 private let i18nBundle: Bundle = {
     let bundleName = "TransactApp_Models"
+
     let main = Bundle.main
-    var candidates = [
+    let paths: [String] = [
         main.bundlePath + "/Contents/Resources/\(bundleName).bundle",
         main.bundlePath + "/\(bundleName).bundle",
-        main.bundlePath + "/../\(bundleName).bundle",
         main.bundlePath + "/Resources/\(bundleName).bundle",
+        main.bundlePath + "/../\(bundleName).bundle",
+        main.bundlePath + "/../../\(bundleName).bundle",
+        main.bundlePath + "/../../../\(bundleName).bundle",
     ]
-    if let rsrc = main.resourcePath {
-        candidates += [
-            "\(rsrc)/\(bundleName).bundle",
-            "\(rsrc)/../\(bundleName).bundle",
-            "\(rsrc)/../../\(bundleName).bundle",
-            "\(rsrc)/../../../\(bundleName).bundle",
-        ]
-    }
-    for path in candidates {
+    for path in paths {
         if let bundle = Bundle(path: path) { return bundle }
     }
+
+    var dir = main.bundleURL
+    for _ in 0..<12 {
+        dir = dir.deletingLastPathComponent()
+        let testPath = dir.appendingPathComponent("\(bundleName).bundle")
+        if let bundle = Bundle(url: testPath) { return bundle }
+    }
+
     return main
 }()
 
