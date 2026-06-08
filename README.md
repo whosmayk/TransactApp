@@ -9,44 +9,57 @@ TransactApp te ayuda a llevar el control de tus ingresos, gastos, suscripciones,
 ## Capturas
 
 *Configuración de saldo inicial*
+
 <img width="2408" height="1506" alt="image" src="https://github.com/user-attachments/assets/64d26c53-2ac8-4e4c-b025-fabf5b61b0cd" />
 
 *Dashboard*
+
 <img width="2408" height="1506" alt="image" src="https://github.com/user-attachments/assets/7bee9206-c552-402e-b21c-c137f68d6079" />
 
 <img width="2408" height="1506" alt="image" src="https://github.com/user-attachments/assets/39561b2a-1269-4c33-b023-971f5cddb006" />
 
 *Nueva Transacción*
+
 <img width="2408" height="1650" alt="image" src="https://github.com/user-attachments/assets/32cd6869-c80b-44fb-8885-6c7397e30eee" />
 
 *Historial de transacciones*
+
 <img width="2408" height="1506" alt="image" src="https://github.com/user-attachments/assets/b015696e-5d75-41f7-9d3b-8070aba227ae" />
 
 *Editar transacciones*
+
 <img width="2408" height="1506" alt="image" src="https://github.com/user-attachments/assets/370b4524-4884-4860-83e1-f0ad207a6789" />
 
 *Generación de reportes mensuales en PDF y CSV*
+
 <img width="2408" height="1506" alt="image" src="https://github.com/user-attachments/assets/63702338-0ada-4c09-901e-f3e9b462006e" />
 
 *Configuración de meta mensual*
+
 <img width="2408" height="1506" alt="image" src="https://github.com/user-attachments/assets/5e609c54-2cfd-4366-a7e2-2caf1a508c21" />
 
 *Respaldos de la base de datos*
+
 <img width="2408" height="1506" alt="image" src="https://github.com/user-attachments/assets/50a2dc87-df35-4549-907b-a3298f4636f8" />
 
 *Borrar la base de datos*
+
 <img width="2408" height="1506" alt="image" src="https://github.com/user-attachments/assets/e11ffc01-ee79-4b65-bd5f-4fd49e236bb7" />
 
 *Simulación de gastos*
+
 <img width="2142" height="706" alt="image" src="https://github.com/user-attachments/assets/f39da7e9-ec66-4920-808a-29b5b0e18abf" />
 
 *Suscripciones y pagos recurrentes*
+
 <img width="2408" height="1506" alt="image" src="https://github.com/user-attachments/assets/28aaf9af-7dbc-405e-819e-6ec663fc51ba" />
 
 *Control de préstamos*
+
 <img width="2408" height="1506" alt="image" src="https://github.com/user-attachments/assets/e4378e39-caab-4f99-93a0-f16a81bf8f99" />
 
 *Cambio de billetes o monedas por otras denominaciones*
+
 <img width="2408" height="1506" alt="image" src="https://github.com/user-attachments/assets/a7e3f309-9989-4fb4-8e1b-8d15791cb4cf" />
 
 
