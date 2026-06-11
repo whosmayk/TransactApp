@@ -12,10 +12,22 @@ final class GestionPrestamosViewModel: ObservableObject {
     @Published var error: String?
 
     let service: LoanService
+    let transactionService: TransactionService
+    let transactionRepo: any TransactionRepository
+    let inventoryRepo: any InventoryRepository
     private let loanRepo: any LoanRepository
 
-    init(service: LoanService, loanRepo: any LoanRepository) {
+    init(
+        service: LoanService,
+        transactionService: TransactionService,
+        transactionRepo: any TransactionRepository,
+        inventoryRepo: any InventoryRepository,
+        loanRepo: any LoanRepository
+    ) {
         self.service = service
+        self.transactionService = transactionService
+        self.transactionRepo = transactionRepo
+        self.inventoryRepo = inventoryRepo
         self.loanRepo = loanRepo
     }
 

@@ -36,6 +36,39 @@ public struct TransactionService: Sendable {
         }
     }
 
+    public func crearDeposito(
+        monto: Decimal,
+        concepto: String,
+        desglose: DesgloseBilletes?
+    ) async throws {
+        try await manager.escribir { db in
+            let ahora = Date()
+            let gasto = Transaccion(
+                fecha: ahora,
+                hora: ahora,
+                concepto: concepto,
+                monto: monto,
+                tipo: .gasto,
+                categoria: "Depósitos",
+                metodo: .efectivo,
+                desglose: desglose
+            )
+            let gastoGuardada = try transactionRepo.insertarEn(db: db, gasto)
+            try Self.aplicar(db, transaccion: gastoGuardada, inventoryRepo: inventoryRepo)
+
+            let ingreso = Transaccion(
+                fecha: ahora,
+                hora: ahora,
+                concepto: concepto,
+                monto: monto,
+                tipo: .ingreso,
+                categoria: "Depósitos",
+                metodo: .tarjeta
+            )
+            try transactionRepo.insertarEn(db: db, ingreso)
+        }
+    }
+
     public func eliminar(_ transaccion: Transaccion) async throws {
         guard let id = transaccion.id else { throw AppDatabaseError.filaNoEncontrada }
         try await manager.escribir { db in

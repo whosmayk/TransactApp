@@ -8,6 +8,7 @@ public final class NavegacionCoordinator: ObservableObject {
         case nuevaTransaccion
         case configuracion(tab: AjustesView.Tab?)
         case cambioBillete
+        case depositoTarjeta
         case importarWindows
         case diagnostico
 
@@ -16,6 +17,7 @@ public final class NavegacionCoordinator: ObservableObject {
             case .nuevaTransaccion: return "nuevaTransaccion"
             case .configuracion(let tab): return "configuracion:\(tab?.rawValue ?? "default")"
             case .cambioBillete: return "cambioBillete"
+            case .depositoTarjeta: return "depositoTarjeta"
             case .importarWindows: return "importarWindows"
             case .diagnostico: return "diagnostico"
             }

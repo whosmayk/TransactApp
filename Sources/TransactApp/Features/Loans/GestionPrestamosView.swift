@@ -1,10 +1,12 @@
 import SwiftUI
 import DesignSystem
 import Models
+import Services
 
 struct GestionPrestamosView: View {
     @ObservedObject var viewModel: GestionPrestamosViewModel
     @State private var prestamoEnEdicion: Prestamo?
+    @State private var prestamoEnPago: Prestamo?
     @State private var mostrarNuevo: Bool = false
 
     var body: some View {
@@ -68,6 +70,19 @@ struct GestionPrestamosView: View {
                 )
             }
             .frame(minWidth: 560, minHeight: 600)
+        }
+        .sheet(item: $prestamoEnPago) { prestamo in
+            RegistrarPagoPrestamoHost(
+                prestamo: prestamo,
+                transactionService: viewModel.transactionService,
+                transactionRepo: viewModel.transactionRepo,
+                inventoryRepo: viewModel.inventoryRepo,
+                loanService: viewModel.service,
+                onCerrar: {
+                    prestamoEnPago = nil
+                    Task { await viewModel.cargar() }
+                }
+            )
         }
     }
 
@@ -163,6 +178,8 @@ struct GestionPrestamosView: View {
                         .onTapGesture { prestamoEnEdicion = p }
                         .contextMenu {
                             Button(LocalizableKey.commonEditar.localized()) { prestamoEnEdicion = p }
+                            Button("Registrar pago", systemImage: "dollarsign.circle") { prestamoEnPago = p }
+                            Divider()
                             Button(LocalizableKey.commonEliminar.localized(), role: .destructive) {
                                 Task { await viewModel.eliminar(p) }
                             }

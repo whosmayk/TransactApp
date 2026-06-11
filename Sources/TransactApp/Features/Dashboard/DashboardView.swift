@@ -84,18 +84,17 @@ struct DashboardView: View {
                         )
                     )
                 case .suscripciones:
-                    GestionSuscripcionesView(
-                        viewModel: GestionSuscripcionesViewModel(
-                            service: environment.subscriptionService,
-                            subRepo: environment.subscriptions
-                        )
+                    GestionSuscripcionesHost(
+                        service: environment.subscriptionService,
+                        subRepo: environment.subscriptions
                     )
                 case .prestamos:
-                    GestionPrestamosView(
-                        viewModel: GestionPrestamosViewModel(
-                            service: environment.loanService,
-                            loanRepo: environment.loans
-                        )
+                    GestionPrestamosHost(
+                        service: environment.loanService,
+                        transactionService: environment.transactionService,
+                        transactionRepo: environment.transactions,
+                        inventoryRepo: environment.inventory,
+                        loanRepo: environment.loans
                     )
                 case .reportes:
                     ReportesView(
@@ -136,6 +135,14 @@ struct DashboardView: View {
             .onDisappear {
                 Task { await proyeccionViewModel.cargar() }
             }
+        case .depositoTarjeta:
+            NavigationStack {
+                DepositoTarjetaHost(
+                    transactionService: environment.transactionService,
+                    onCerrar: { navegacion.cerrarHoja() }
+                )
+            }
+            .frame(minWidth: 520, minHeight: 580)
         case .cambioBillete:
             CambioBilleteHost(
                 inventoryService: environment.inventoryService,
@@ -325,14 +332,7 @@ struct DashboardView: View {
     }
 
     private var seccionResumenPrestamos: some View {
-        NavigationLink {
-            GestionPrestamosView(
-                viewModel: GestionPrestamosViewModel(
-                    service: environment.loanService,
-                    loanRepo: environment.loans
-                )
-            )
-        } label: {
+        NavigationLink(value: NavegacionCoordinator.Destino.prestamos) {
             CardView {
                 HStack(spacing: TemaEspaciado.m) {
                     Image(systemName: "arrow.left.arrow.right")
@@ -381,14 +381,7 @@ struct DashboardView: View {
     }
 
     private var seccionResumenSuscripciones: some View {
-        NavigationLink {
-            GestionSuscripcionesView(
-                viewModel: GestionSuscripcionesViewModel(
-                    service: environment.subscriptionService,
-                    subRepo: environment.subscriptions
-                )
-            )
-        } label: {
+        NavigationLink(value: NavegacionCoordinator.Destino.suscripciones) {
             CardView {
                 HStack(spacing: TemaEspaciado.m) {
                     Image(systemName: "repeat.circle.fill")
@@ -479,6 +472,9 @@ struct DashboardView: View {
             }
             GhostButton(LocalizableKey.dashboardReporte.localized(), icono: "doc.text") {
                 navegacion.navegar(.reportes)
+            }
+            GhostButton("Depositar a tarjeta", icono: "creditcard") {
+                navegacion.abrirHoja(.depositoTarjeta)
             }
         }
     }

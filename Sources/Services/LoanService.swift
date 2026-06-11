@@ -47,6 +47,29 @@ public struct LoanService: Sendable {
         }
     }
 
+    public func registrarPagoConTransaccion(
+        prestamoId: Int64,
+        montoPago: Decimal,
+        transaccion: Transaccion,
+        transactionRepo: any TransactionRepository,
+        inventoryRepo: any InventoryRepository
+    ) async throws {
+        guard montoPago > 0 else {
+            throw AppDatabaseError.esquemaInvalido(mensaje: "El pago debe ser mayor a 0")
+        }
+        try await manager.escribir { db in
+            guard var prestamo = try loanRepo.obtenerEn(db: db, id: prestamoId) else {
+                throw AppDatabaseError.filaNoEncontrada
+            }
+            let nuevoPagado = min(prestamo.monto, prestamo.montoPagado + montoPago)
+            prestamo.montoPagado = nuevoPagado
+            try loanRepo.actualizarEn(db: db, prestamo)
+
+            let guardada = try transactionRepo.insertarEn(db: db, transaccion)
+            try TransactionService.aplicar(db, transaccion: guardada, inventoryRepo: inventoryRepo)
+        }
+    }
+
     static func validar(_ prestamo: Prestamo) throws {
         if prestamo.persona.trimmingCharacters(in: .whitespaces).isEmpty {
             throw AppDatabaseError.esquemaInvalido(mensaje: "La persona no puede estar vacía")
