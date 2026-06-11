@@ -48,3 +48,41 @@ struct GestionSuscripcionesHost: View {
         GestionSuscripcionesView(viewModel: viewModel)
     }
 }
+
+struct HistorialHost: View {
+    @StateObject private var viewModel: HistorialViewModel
+
+    init(
+        service: TransactionService,
+        transactionRepo: any TransactionRepository
+    ) {
+        _viewModel = StateObject(
+            wrappedValue: HistorialViewModel(
+                service: service,
+                transactionRepo: transactionRepo
+            )
+        )
+    }
+
+    var body: some View {
+        HistorialView(viewModel: viewModel)
+    }
+}
+
+struct ReportesHost: View {
+    @StateObject private var viewModel: ReportesViewModel
+
+    init(
+        service: ReportesService
+    ) {
+        _viewModel = StateObject(
+            wrappedValue: ReportesViewModel(
+                service: service
+            )
+        )
+    }
+
+    var body: some View {
+        ReportesView(viewModel: viewModel)
+    }
+}

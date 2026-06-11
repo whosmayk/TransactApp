@@ -43,11 +43,8 @@ struct GestionSuscripcionesView: View {
         .refreshable { await viewModel.cargar() }
         .sheet(isPresented: $mostrarNuevo) {
             NavigationStack {
-                FormularioSuscripcionView(
-                    viewModel: FormularioSuscripcionViewModel(
-                        service: viewModel.service,
-                        suscripcionInicial: nil
-                    ),
+                FormularioSuscripcionHost(
+                    service: viewModel.service,
                     onCerrar: {
                         mostrarNuevo = false
                         Task { await viewModel.cargar() }
@@ -58,11 +55,9 @@ struct GestionSuscripcionesView: View {
         }
         .sheet(item: $suscripcionEnEdicion) { suscripcion in
             NavigationStack {
-                FormularioSuscripcionView(
-                    viewModel: FormularioSuscripcionViewModel(
-                        service: viewModel.service,
-                        suscripcionInicial: suscripcion
-                    ),
+                FormularioSuscripcionHost(
+                    service: viewModel.service,
+                    suscripcionInicial: suscripcion,
                     onCerrar: {
                         suscripcionEnEdicion = nil
                         Task { await viewModel.cargar() }

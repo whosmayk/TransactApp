@@ -43,11 +43,8 @@ struct GestionPrestamosView: View {
         .refreshable { await viewModel.cargar() }
         .sheet(isPresented: $mostrarNuevo) {
             NavigationStack {
-                FormularioPrestamoView(
-                    viewModel: FormularioPrestamoViewModel(
-                        service: viewModel.service,
-                        prestamoInicial: nil
-                    ),
+                FormularioPrestamoHost(
+                    service: viewModel.service,
                     onCerrar: {
                         mostrarNuevo = false
                         Task { await viewModel.cargar() }
@@ -58,11 +55,9 @@ struct GestionPrestamosView: View {
         }
         .sheet(item: $prestamoEnEdicion) { prestamo in
             NavigationStack {
-                FormularioPrestamoView(
-                    viewModel: FormularioPrestamoViewModel(
-                        service: viewModel.service,
-                        prestamoInicial: prestamo
-                    ),
+                FormularioPrestamoHost(
+                    service: viewModel.service,
+                    prestamoInicial: prestamo,
                     onCerrar: {
                         prestamoEnEdicion = nil
                         Task { await viewModel.cargar() }

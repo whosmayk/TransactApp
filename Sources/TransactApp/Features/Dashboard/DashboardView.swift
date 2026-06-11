@@ -77,11 +77,9 @@ struct DashboardView: View {
                 case .dashboard:
                     EmptyView()
                 case .historial:
-                    HistorialView(
-                        viewModel: HistorialViewModel(
-                            service: environment.transactionService,
-                            transactionRepo: environment.transactions
-                        )
+                    HistorialHost(
+                        service: environment.transactionService,
+                        transactionRepo: environment.transactions
                     )
                 case .suscripciones:
                     GestionSuscripcionesHost(
@@ -97,10 +95,8 @@ struct DashboardView: View {
                         loanRepo: environment.loans
                     )
                 case .reportes:
-                    ReportesView(
-                        viewModel: ReportesViewModel(
-                            service: environment.reportesService
-                        )
+                    ReportesHost(
+                        service: environment.reportesService
                     )
                 }
             }
