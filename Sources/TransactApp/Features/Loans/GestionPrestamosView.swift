@@ -245,6 +245,29 @@ private struct FilaPrestamoView: View {
             RoundedRectangle(cornerRadius: TemaRadio.m)
                 .fill(AppColor.surface0)
         )
+        .overlay(alignment: .bottomTrailing) {
+            if !prestamo.estaPagado {
+                Button {
+                    onPagar()
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "dollarsign.circle.fill")
+                        Text(LocalizableKey.prestamoPagoRegistrar.localized())
+                    }
+                    .font(.caption)
+                    .foregroundColor(AppColor.green)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(AppColor.green.opacity(0.12))
+                    )
+                }
+                .buttonStyle(.plain)
+                .padding(.trailing, TemaEspaciado.m)
+                .padding(.bottom, TemaEspaciado.m)
+            }
+        }
     }
 
     private var fecha: String {
