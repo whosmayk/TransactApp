@@ -45,7 +45,7 @@ final class UpdateCoordinator: ObservableObject, @unchecked Sendable {
     func check() async {
         estado = .verificando
         do {
-            let (data, _) = try await URLSession.shared.data(from: feedURL)
+            let (data, _) = try await URLSession.shared.data(for: urlRequest())
             let appcast = try JSONDecoder().decode(Appcast.self, from: data)
             guard let remota = try? Version(appcast.latestVersion) else {
                 estado = .error("Formato de versión inválido en el feed")
@@ -67,7 +67,7 @@ final class UpdateCoordinator: ObservableObject, @unchecked Sendable {
     func checkSilencioso() async {
         guard estado == .inactivo else { return }
         do {
-            let (data, _) = try await URLSession.shared.data(from: feedURL)
+            let (data, _) = try await URLSession.shared.data(for: urlRequest())
             let appcast = try JSONDecoder().decode(Appcast.self, from: data)
             guard let remota = try? Version(appcast.latestVersion) else { return }
             guard remota > versionActual else { return }
@@ -94,6 +94,13 @@ final class UpdateCoordinator: ObservableObject, @unchecked Sendable {
             alert.addButton(withTitle: LocalizableKey.commonAceptar.localized())
             alert.runModal()
         }
+    }
+
+    private func urlRequest() -> URLRequest {
+        var req = URLRequest(url: feedURL)
+        req.cachePolicy = .reloadIgnoringLocalCacheData
+        req.timeoutInterval = 15
+        return req
     }
 
     private func mostrarAlerta(remota: Version, urlDescarga: String, notas: String) {
