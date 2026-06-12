@@ -20,7 +20,8 @@ public struct TransactionService: Sendable {
 
     @discardableResult
     public func crear(_ transaccion: Transaccion) async throws -> Transaccion {
-        try await manager.escribir { db in
+        try Self.validar(transaccion)
+        return try await manager.escribir { db in
             let guardada = try transactionRepo.insertarEn(db: db, transaccion)
             try Self.aplicar(db, transaccion: guardada, inventoryRepo: inventoryRepo)
             return guardada
@@ -28,7 +29,8 @@ public struct TransactionService: Sendable {
     }
 
     public func actualizar(_ nueva: Transaccion, original: Transaccion) async throws -> Transaccion {
-        try await manager.escribir { db in
+        try Self.validar(nueva)
+        return try await manager.escribir { db in
             try Self.revertir(db, transaccion: original, inventoryRepo: inventoryRepo)
             let guardada = try transactionRepo.actualizarEn(db: db, nueva)
             try Self.aplicar(db, transaccion: guardada, inventoryRepo: inventoryRepo)
@@ -41,6 +43,9 @@ public struct TransactionService: Sendable {
         concepto: String,
         desglose: DesgloseBilletes?
     ) async throws {
+        guard monto > 0 else {
+            throw AppDatabaseError.esquemaInvalido(mensaje: "El monto debe ser mayor a 0")
+        }
         try await manager.escribir { db in
             let ahora = Date()
             let gasto = Transaccion(
@@ -109,6 +114,18 @@ public struct TransactionService: Sendable {
             guard cant != 0 else { continue }
             let delta = tipo == .ingreso ? cant : -cant
             try inventoryRepo.ajustarEn(db: db, denominacion: denom, delta: delta)
+        }
+    }
+
+    static func validar(_ transaccion: Transaccion) throws {
+        if transaccion.concepto.trimmingCharacters(in: .whitespaces).isEmpty {
+            throw AppDatabaseError.esquemaInvalido(mensaje: "El concepto no puede estar vacio")
+        }
+        if transaccion.monto <= 0 {
+            throw AppDatabaseError.esquemaInvalido(mensaje: "El monto debe ser mayor a 0")
+        }
+        if transaccion.categoria.trimmingCharacters(in: .whitespaces).isEmpty {
+            throw AppDatabaseError.esquemaInvalido(mensaje: "La categoria no puede estar vacia")
         }
     }
 }

@@ -10,6 +10,7 @@ final class GestionSuscripcionesViewModel: ObservableObject {
     @Published var suscripciones: [Suscripcion] = []
     @Published var cargando: Bool = false
     @Published var error: String?
+    private var necesitaRecarga = false
     @Published var filtro: FiltroSuscripcion = .todas
 
     enum FiltroSuscripcion: String, CaseIterable, Identifiable {
@@ -62,10 +63,19 @@ final class GestionSuscripcionesViewModel: ObservableObject {
     }
 
     func cargar() async {
-        guard !cargando else { return }
+        guard !cargando else {
+            necesitaRecarga = true
+            return
+        }
         cargando = true
         error = nil
-        defer { cargando = false }
+        defer {
+            cargando = false
+            if necesitaRecarga {
+                necesitaRecarga = false
+                Task { await cargar() }
+            }
+        }
         do {
             suscripciones = try await subRepo.listar()
         } catch {

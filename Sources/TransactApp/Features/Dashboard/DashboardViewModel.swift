@@ -18,6 +18,7 @@ final class DashboardViewModel: ObservableObject {
     @Published var notificaciones: [NotificacionSuscripcion] = []
     @Published var cargando: Bool = false
     @Published var error: String?
+    private var necesitaRecarga = false
 
     private let initialBalanceRepo: any InitialBalanceRepository
     private let inventoryRepo: any InventoryRepository
@@ -79,10 +80,19 @@ final class DashboardViewModel: ObservableObject {
     }
 
     func cargar() async {
-        guard !cargando else { return }
+        guard !cargando else {
+            necesitaRecarga = true
+            return
+        }
         cargando = true
         error = nil
-        defer { cargando = false }
+        defer {
+            cargando = false
+            if necesitaRecarga {
+                necesitaRecarga = false
+                Task { await cargar() }
+            }
+        }
 
         do {
             async let saldoInicialTask = initialBalanceRepo.obtener()

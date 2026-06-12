@@ -6,10 +6,16 @@ import Database
 public struct SubscriptionService: Sendable {
     private let manager: DatabaseManager
     private let subRepo: any SubscriptionRepository
+    private let transactionRepo: any TransactionRepository
 
-    public init(manager: DatabaseManager, subRepo: any SubscriptionRepository) {
+    public init(
+        manager: DatabaseManager,
+        subRepo: any SubscriptionRepository,
+        transactionRepo: any TransactionRepository
+    ) {
         self.manager = manager
         self.subRepo = subRepo
+        self.transactionRepo = transactionRepo
     }
 
     @discardableResult
@@ -52,7 +58,21 @@ public struct SubscriptionService: Sendable {
             var nueva = actual
             nueva.proximoCobro = nuevoProximo
             nueva.notificado = false
-            return try subRepo.actualizarEn(db: db, nueva)
+            let actualizada = try subRepo.actualizarEn(db: db, nueva)
+
+            let ahora = Date()
+            _ = try transactionRepo.insertarEn(db: db, Transaccion(
+                id: nil,
+                fecha: ahora,
+                hora: ahora,
+                concepto: actual.concepto,
+                monto: actual.monto,
+                tipo: .gasto,
+                categoria: actual.categoria,
+                metodo: .efectivo
+            ))
+
+            return actualizada
         }
     }
 

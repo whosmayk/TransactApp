@@ -15,7 +15,7 @@ struct AppErrorTests {
         #expect(appError.category == .critical)
         #expect(appError.source == .simulador)
         #expect(appError.message == "100")
-        #expect(appError.title == "Algo salió mal")
+        #expect(appError.title == LocalizableKey.errorAceptarTitulo.localized())
     }
 
     @Test("factory warning construye AppError con categoría .warning")
@@ -24,7 +24,7 @@ struct AppErrorTests {
         let appError = AppError.warning(typed, source: .backup)
         #expect(appError.category == .warning)
         #expect(appError.source == .backup)
-        #expect(appError.title == "Atención")
+        #expect(appError.title == LocalizableKey.errorWarningTitulo.localized())
     }
 
     @Test("factory info construye AppError con categoría .info")
@@ -33,7 +33,7 @@ struct AppErrorTests {
         let appError = AppError.info(typed, source: .simulador)
         #expect(appError.category == .info)
         #expect(appError.source == .simulador)
-        #expect(appError.title == "Información")
+        #expect(appError.title == LocalizableKey.errorInfoTitulo.localized())
     }
 
     @Test("factory from con sugerencia preserva la sugerencia")

@@ -30,11 +30,11 @@ public enum ResultadoBusqueda: Identifiable, Equatable, Sendable {
     public var id: String {
         switch self {
         case .transaccion(let tx):
-            return "tx:\(tx.id ?? -1)"
+            return "tx:\(tx.id?.description ?? tx.concepto)"
         case .prestamo(let pr):
-            return "pr:\(pr.id ?? -1)"
+            return "pr:\(pr.id?.description ?? pr.persona)"
         case .suscripcion(let su):
-            return "su:\(su.id ?? -1)"
+            return "su:\(su.id?.description ?? su.concepto)"
         }
     }
 

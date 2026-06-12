@@ -16,10 +16,10 @@ struct DesgloseBilletesEditorView: View {
         VStack(alignment: .leading, spacing: TemaEspaciado.m) {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Desglose de billetes")
+                    Text(LocalizableKey.desgloseTitulo.localized())
                         .font(Tipografia.subtitulo())
                         .foregroundColor(AppColor.text)
-                    Text("Suma igual al monto del gasto")
+                    Text(LocalizableKey.desgloseAyuda.localized())
                         .font(Tipografia.cuerpo())
                         .foregroundColor(AppColor.subtext1)
                 }

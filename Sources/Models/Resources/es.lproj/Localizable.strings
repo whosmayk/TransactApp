@@ -511,3 +511,32 @@
 "updates.descargar" = "Descargar e instalar";
 "updates.error.instalar" = "Error al instalar la actualización";
 "updates.actualizado" = "Estás actualizado";
+
+"desglose.titulo" = "Desglose de billetes";
+"desglose.ayuda" = "Suma igual al monto del gasto";
+
+"deposito.tarjeta.titulo" = "Depósito a tarjeta";
+"deposito.tarjeta.desc" = "Retira efectivo y abona a tu tarjeta en un solo paso";
+"deposito.tarjeta.monto" = "Monto a depositar";
+"deposito.tarjeta.descuenta" = "Se descuenta de:";
+"deposito.tarjeta.boton" = "Depositar";
+
+"simulador.suscripcion_a_cancelar" = "Suscripción a cancelar";
+"simulador.sin_suscripciones" = "No tienes suscripciones activas.";
+"simulador.placeholder_concepto" = "Ej: Spotify";
+"simulador.sin_categorias" = "Sin categorías con histórico.";
+"simulador.reducir_porcentaje" = "Reducir %";
+"simulador.restablecer" = "Restablecer";
+"simulador.simular" = "Simular";
+"simulador.saldo_actual" = "Saldo actual";
+"simulador.quedaria" = "Quedaría";
+"simulador.impacto_inmediato" = "Impacto inmediato";
+"simulador.impacto_mensual" = "Impacto mensual";
+"simulador.en_12_meses" = "En 12 meses";
+"simulador.promedio_categoria" = "Promedio actual en la categoría: %@ al mes";
+
+"prestamo.pago.monto" = "Monto del pago";
+"prestamo.pago.datos" = "Datos del pago";
+"prestamo.pago.recibir" = "Recibir pago";
+"prestamo.pago.realizar" = "Realizar pago";
+"prestamo.pago.registrar" = "Registrar pago";

@@ -511,3 +511,32 @@
 "updates.descargar" = "Download & Install";
 "updates.error.instalar" = "Error installing update";
 "updates.actualizado" = "You're up to date";
+
+"desglose.titulo" = "Bill breakdown";
+"desglose.ayuda" = "Sum must match the expense amount";
+
+"deposito.tarjeta.titulo" = "Card deposit";
+"deposito.tarjeta.desc" = "Withdraw cash and add it to your card in one step";
+"deposito.tarjeta.monto" = "Amount to deposit";
+"deposito.tarjeta.descuenta" = "Deducted from:";
+"deposito.tarjeta.boton" = "Deposit";
+
+"simulador.suscripcion_a_cancelar" = "Subscription to cancel";
+"simulador.sin_suscripciones" = "No active subscriptions.";
+"simulador.placeholder_concepto" = "e.g. Spotify";
+"simulador.sin_categorias" = "No categories with history.";
+"simulador.reducir_porcentaje" = "Reduce %";
+"simulador.restablecer" = "Reset";
+"simulador.simular" = "Simulate";
+"simulador.saldo_actual" = "Current balance";
+"simulador.quedaria" = "Would be";
+"simulador.impacto_inmediato" = "Immediate impact";
+"simulador.impacto_mensual" = "Monthly impact";
+"simulador.en_12_meses" = "In 12 months";
+"simulador.promedio_categoria" = "Current average in category: %@ per month";
+
+"prestamo.pago.monto" = "Payment amount";
+"prestamo.pago.datos" = "Payment details";
+"prestamo.pago.recibir" = "Receive payment";
+"prestamo.pago.realizar" = "Make payment";
+"prestamo.pago.registrar" = "Register payment";

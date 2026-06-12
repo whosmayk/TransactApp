@@ -47,7 +47,7 @@ public struct SimuladorGastosService: Sendable {
             nuevoSaldoTj = resumen.saldoTarjeta - monto
         }
         let nuevoBalance = nuevoSaldoEf + nuevoSaldoTj
-        let nuevoBalanceReal = nuevoBalance - resumen.totalDeudas
+        let nuevoBalanceReal = nuevoBalance - resumen.totalDeudas + resumen.totalMeDeben
 
         let simulado = ResumenFinanciero(
             saldoInicialEfectivo: resumen.saldoInicialEfectivo,
@@ -56,6 +56,7 @@ public struct SimuladorGastosService: Sendable {
             saldoTarjeta: nuevoSaldoTj,
             balanceTotal: nuevoBalance,
             totalDeudas: resumen.totalDeudas,
+            totalMeDeben: resumen.totalMeDeben,
             balanceReal: nuevoBalanceReal,
             totalIngresos: resumen.totalIngresos,
             totalGastos: resumen.totalGastos + monto
@@ -93,9 +94,10 @@ public struct SimuladorGastosService: Sendable {
             saldoTarjeta: resumen.saldoTarjeta,
             balanceTotal: resumen.balanceTotal,
             totalDeudas: resumen.totalDeudas,
+            totalMeDeben: resumen.totalMeDeben,
             balanceReal: resumen.balanceReal,
             totalIngresos: resumen.totalIngresos,
-            totalGastos: resumen.totalGastos
+            totalGastos: resumen.totalGastos - impactoMensual
         )
 
         let mensaje = "Cancelar '\(susc.concepto)' te ahorraría \(textoMoneda(impactoMensual)) al mes, \(textoMoneda(impactoAnual)) al año."
@@ -130,9 +132,10 @@ public struct SimuladorGastosService: Sendable {
             saldoTarjeta: resumen.saldoTarjeta,
             balanceTotal: resumen.balanceTotal,
             totalDeudas: resumen.totalDeudas,
+            totalMeDeben: resumen.totalMeDeben,
             balanceReal: resumen.balanceReal,
             totalIngresos: resumen.totalIngresos,
-            totalGastos: resumen.totalGastos
+            totalGastos: resumen.totalGastos + impactoMensual
         )
 
         let mensaje: String
@@ -176,6 +179,9 @@ public struct SimuladorGastosService: Sendable {
         }
         let total = gastosCategoria.reduce(into: Decimal(0)) { $0 += $1.monto }
         let mesesDecimal = Decimal(contexto.mesesHistorico)
+        guard mesesDecimal > 0 else {
+            return .failure(.contextoInsuficiente("El histórico de meses debe ser mayor a 0."))
+        }
         let promedioMensual = total / mesesDecimal
         let factorReduccion = porcentaje / 100
         var ahorroMensual = promedioMensual * factorReduccion
@@ -191,9 +197,10 @@ public struct SimuladorGastosService: Sendable {
             saldoTarjeta: resumen.saldoTarjeta,
             balanceTotal: resumen.balanceTotal,
             totalDeudas: resumen.totalDeudas,
+            totalMeDeben: resumen.totalMeDeben,
             balanceReal: resumen.balanceReal,
             totalIngresos: resumen.totalIngresos,
-            totalGastos: resumen.totalGastos
+            totalGastos: resumen.totalGastos - ahorroRedondeado
         )
 
         let porcentajeTexto = Localizador.decimal(porcentaje, fracciones: 0)

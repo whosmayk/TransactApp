@@ -31,13 +31,13 @@ struct RegistrarPagoPrestamoView: View {
 
                 Section {
                     CampoMontoField(
-                        titulo: "Monto del pago",
+                        titulo: LocalizableKey.prestamoPagoMonto.localized(),
                         placeholder: "0",
                         texto: $viewModel.montoPago.texto
                     )
                     DatePicker(LocalizableKey.commonFecha.localized(), selection: $viewModel.fecha, displayedComponents: .date)
                 } header: {
-                    Text("Datos del pago")
+                    Text(LocalizableKey.prestamoPagoDatos.localized())
                 }
 
                 Section {
@@ -79,7 +79,7 @@ struct RegistrarPagoPrestamoView: View {
                     Button(LocalizableKey.commonCancelar.localized(), action: onCerrar)
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Registrar pago") {
+                    Button(LocalizableKey.prestamoPagoRegistrar.localized()) {
                         Task { await viewModel.registrar() }
                     }
                     .disabled(!viewModel.esValido || viewModel.guardando)
@@ -93,7 +93,9 @@ struct RegistrarPagoPrestamoView: View {
     }
 
     private var accionTitulo: String {
-        viewModel.prestamo.tipo == .meDeben ? "Recibir pago" : "Realizar pago"
+        viewModel.prestamo.tipo == .meDeben
+            ? LocalizableKey.prestamoPagoRecibir.localized()
+            : LocalizableKey.prestamoPagoRealizar.localized()
     }
 }
 

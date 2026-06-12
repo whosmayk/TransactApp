@@ -237,7 +237,9 @@ struct WindowsDatabaseImporterTests {
 
         let fila = try await mac.leer { db -> (id: Int, ef: Double, tj: Double)? in
             try Row.fetchOne(db, sql: "SELECT id, efectivo, tarjeta FROM SaldoInicial").map {
-                (id: $0["id"] ?? 0, ef: $0["efectivo"] ?? 0, tj: $0["tarjeta"] ?? 0)
+                let efRaw = ($0["efectivo"] as Int64? ?? 0)
+                let tjRaw = ($0["tarjeta"] as Int64? ?? 0)
+                return (id: $0["id"] ?? 0, ef: Double(efRaw) / 100, tj: Double(tjRaw) / 100)
             }
         }
         #expect(fila?.id == 1)
@@ -350,7 +352,7 @@ struct WindowsDatabaseImporterTests {
         try await mac.escribir { db in
             try db.execute(sql: """
                 INSERT INTO SaldoInicial (id, efectivo, tarjeta, fechaCreacion, inventarioJson)
-                VALUES (1, 100.0, 50.0, '2026-01-01T00:00:00', '[]')
+                VALUES (1, 10000, 5000, '2026-01-01T00:00:00', '[]')
                 """)
         }
         let res = try await WindowsDatabaseImporter.importar(
@@ -363,10 +365,10 @@ struct WindowsDatabaseImporterTests {
         #expect(res.saldoInicialImportado == true)
         let saldo = try await mac.leer { db -> (ef: Double, tj: Double) in
             let fila = try Row.fetchOne(db, sql: "SELECT efectivo, tarjeta FROM SaldoInicial")
-            return (fila?["efectivo"] ?? 0, fila?["tarjeta"] ?? 0)
+            return (centAVos(fila, "efectivo"), centAVos(fila, "tarjeta"))
         }
-        #expect(saldo.ef == 100.0)
-        #expect(saldo.tj == 50.0)
+        #expect(abs(saldo.ef - 100.0) < 0.001)
+        #expect(abs(saldo.tj - 50.0) < 0.001)
     }
 
     @Test("Importar sin saldo inicial: conserva el inventarioJson del destino")
@@ -434,22 +436,24 @@ struct WindowsDatabaseImporterTests {
         #expect(res.saldoInicialImportado == true)
         let saldoFinal = try await mac.leer { db -> (ef: Double, tj: Double) in
             let fila = try Row.fetchOne(db, sql: "SELECT efectivo, tarjeta FROM SaldoInicial")
-            return (fila?["efectivo"] ?? 0, fila?["tarjeta"] ?? 0)
+            return (centAVos(fila, "efectivo"), centAVos(fila, "tarjeta"))
         }
         #expect(abs(saldoFinal.ef - (-200.0)) < 0.001)
         #expect(abs(saldoFinal.tj - 4963.50) < 0.001)
         let balance = try await mac.leer { db -> (ef: Double, tj: Double) in
-            let deltaEf = try Double.fetchOne(db, sql: """
+            let deltaEfCents = try Int64.fetchOne(db, sql: """
                 SELECT COALESCE(SUM(CASE WHEN tipo='Ingreso' THEN monto ELSE -monto END), 0)
                 FROM Transacciones WHERE metodo='Efectivo'
                 """) ?? 0
-            let deltaTj = try Double.fetchOne(db, sql: """
+            let deltaTjCents = try Int64.fetchOne(db, sql: """
                 SELECT COALESCE(SUM(CASE WHEN tipo='Ingreso' THEN monto ELSE -monto END), 0)
                 FROM Transacciones WHERE metodo='Tarjeta'
                 """) ?? 0
+            let deltaEf = Double(deltaEfCents) / 100
+            let deltaTj = Double(deltaTjCents) / 100
             let si = try Row.fetchOne(db, sql: "SELECT efectivo, tarjeta FROM SaldoInicial")
-            let ef = (si?["efectivo"] ?? 0) + deltaEf
-            let tj = (si?["tarjeta"] ?? 0) + deltaTj
+            let ef = (centAVos(si, "efectivo")) + deltaEf
+            let tj = (centAVos(si, "tarjeta")) + deltaTj
             return (ef, tj)
         }
         #expect(abs(balance.ef - 100.0) < 0.01)
@@ -473,7 +477,7 @@ struct WindowsDatabaseImporterTests {
         )
         let saldoFinal = try await mac.leer { db -> (ef: Double, tj: Double) in
             let fila = try Row.fetchOne(db, sql: "SELECT efectivo, tarjeta FROM SaldoInicial")
-            return (fila?["efectivo"] ?? 0, fila?["tarjeta"] ?? 0)
+            return (centAVos(fila, "efectivo"), centAVos(fila, "tarjeta"))
         }
         #expect(abs(saldoFinal.ef - 250.0) < 0.001)
         #expect(abs(saldoFinal.tj - 750.50) < 0.001)
@@ -504,7 +508,7 @@ struct WindowsDatabaseImporterTests {
         )
         let saldoFinal = try await mac.leer { db -> (ef: Double, tj: Double) in
             let fila = try Row.fetchOne(db, sql: "SELECT efectivo, tarjeta FROM SaldoInicial")
-            return (fila?["efectivo"] ?? 0, fila?["tarjeta"] ?? 0)
+            return (centAVos(fila, "efectivo"), centAVos(fila, "tarjeta"))
         }
         #expect(abs(saldoFinal.ef - 250.0) < 0.001)
         #expect(abs(saldoFinal.tj - 1000.0) < 0.001)
@@ -667,7 +671,7 @@ struct WindowsDatabaseImporterIntegracionTests {
 
         let saldo = try await mac.leer { db -> (id: Int, ef: Double, tj: Double) in
             let fila = try Row.fetchOne(db, sql: "SELECT id, efectivo, tarjeta FROM SaldoInicial")
-            return (fila?["id"] ?? 0, fila?["efectivo"] ?? 0, fila?["tarjeta"] ?? 0)
+            return (fila?["id"] ?? 0, centAVos(fila, "efectivo"), centAVos(fila, "tarjeta"))
         }
         #expect(saldo.id == 1)
         let efAbs = abs(saldo.ef - 2260.0)
@@ -783,17 +787,17 @@ struct WindowsDatabaseImporterIntegracionTests {
 
         let (saldoInicialEf, saldoInicialTj, deltaEf, deltaTj) = try await mac.leer { db -> (Double, Double, Double, Double) in
             let si = try Row.fetchOne(db, sql: "SELECT efectivo, tarjeta FROM SaldoInicial")
-            let ef: Double = (si?["efectivo"] as? Double) ?? 0
-            let tj: Double = (si?["tarjeta"] as? Double) ?? 0
-            let dEf = try Double.fetchOne(db, sql: """
+            let ef: Double = centAVos(si, "efectivo")
+            let tj: Double = centAVos(si, "tarjeta")
+            let dEfCents = try Int64.fetchOne(db, sql: """
                 SELECT COALESCE(SUM(CASE WHEN tipo='Ingreso' THEN monto ELSE -monto END), 0)
                 FROM Transacciones WHERE metodo='Efectivo'
                 """) ?? 0
-            let dTj = try Double.fetchOne(db, sql: """
+            let dTjCents = try Int64.fetchOne(db, sql: """
                 SELECT COALESCE(SUM(CASE WHEN tipo='Ingreso' THEN monto ELSE -monto END), 0)
                 FROM Transacciones WHERE metodo='Tarjeta'
                 """) ?? 0
-            return (ef, tj, dEf, dTj)
+            return (ef, tj, Double(dEfCents) / 100, Double(dTjCents) / 100)
         }
 
         let balanceEf = saldoInicialEf + deltaEf
@@ -801,4 +805,8 @@ struct WindowsDatabaseImporterIntegracionTests {
         #expect(abs(balanceEf - realEf) < 0.01)
         #expect(abs(balanceTj - realTj) < 0.01)
     }
+}
+
+private func centAVos(_ row: Row?, _ col: String) -> Double {
+    Double((row?[col] as Int64?) ?? 0) / 100.0
 }

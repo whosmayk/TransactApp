@@ -135,8 +135,8 @@ struct CalculosFinancierosTests {
         #expect(r.balanceReal == 1000)
     }
 
-    @Test("Préstamo 'Me deben' nunca afecta balance real")
-    func prestamoMeDebenNuncaAfecta() {
+    @Test("Préstamo 'Me deben' con afectaBalance incrementa balance real")
+    func prestamoMeDebenAfecta() {
         let inicial = SaldoInicial(efectivo: 0, tarjeta: 500, inventarioInicial: [])
         let prestamos = [
             Prestamo(id: nil, persona: "Pedro", concepto: "Me pagó",
@@ -148,7 +148,42 @@ struct CalculosFinancierosTests {
             prestamos: prestamos
         )
         #expect(r.totalDeudas == 0)
+        #expect(r.totalMeDeben == 300)
+        #expect(r.balanceReal == 800)
+    }
+
+    @Test("Préstamo 'Me deben' sin afectaBalance se ignora")
+    func prestamoMeDebenNoAfecta() {
+        let inicial = SaldoInicial(efectivo: 0, tarjeta: 500, inventarioInicial: [])
+        let prestamos = [
+            Prestamo(id: nil, persona: "Pedro", concepto: "Me pagó",
+                monto: 300, tipo: .meDeben, fecha: fecha, afectaBalance: false)
+        ]
+        let r = CalculosFinancieros.resumen(
+            saldoInicial: inicial,
+            transacciones: [],
+            prestamos: prestamos
+        )
+        #expect(r.totalDeudas == 0)
+        #expect(r.totalMeDeben == 0)
         #expect(r.balanceReal == 500)
+    }
+
+    @Test("Préstamo con pagos parciales usa saldo pendiente")
+    func prestamoConPagosParciales() {
+        let inicial = SaldoInicial(efectivo: 0, tarjeta: 2000, inventarioInicial: [])
+        let prestamos = [
+            Prestamo(id: nil, persona: "Banco", concepto: "Crédito",
+                monto: 1000, tipo: .debo, fecha: fecha,
+                afectaBalance: true, montoPagado: 600)
+        ]
+        let r = CalculosFinancieros.resumen(
+            saldoInicial: inicial,
+            transacciones: [],
+            prestamos: prestamos
+        )
+        #expect(r.totalDeudas == 400)
+        #expect(r.balanceReal == 1600)
     }
 
     @Test("Suma múltiples deudas que afectan")

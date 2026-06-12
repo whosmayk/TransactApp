@@ -52,14 +52,20 @@ public struct ReportesService: Sendable {
             .filter { $0.tipo == .gasto }
             .reduce(into: Decimal(0)) { $0 += $1.monto }
 
+        let resumenFinanciero = CalculosFinancieros.resumen(
+            saldoInicial: saldoInicial,
+            transacciones: todas,
+            prestamos: prestamos
+        )
+
         let datos = DatosReporte(
             saldoInicialEfectivo: saldoInicial?.efectivo ?? 0,
             saldoInicialTarjeta: saldoInicial?.tarjeta ?? 0,
-            saldoEfectivo: 0,
-            saldoTarjeta: 0,
-            balanceTotal: 0,
-            totalDeudas: 0,
-            balanceReal: 0,
+            saldoEfectivo: resumenFinanciero.saldoEfectivo,
+            saldoTarjeta: resumenFinanciero.saldoTarjeta,
+            balanceTotal: resumenFinanciero.balanceTotal,
+            totalDeudas: resumenFinanciero.totalDeudas,
+            balanceReal: resumenFinanciero.balanceReal,
             totalIngresos: totalIngresos,
             totalGastos: totalGastos,
             transacciones: transaccionesDelMes,

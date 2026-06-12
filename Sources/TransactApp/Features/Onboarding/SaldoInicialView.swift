@@ -40,7 +40,7 @@ struct SaldoInicialView: View {
             .frame(maxWidth: .infinity)
         }
         .background(AppColor.base)
-        .onChange(of: viewModel.completado) { nuevo in
+        .onChange(of: viewModel.completado) { _, nuevo in
             if nuevo { onCompletado() }
         }
     }

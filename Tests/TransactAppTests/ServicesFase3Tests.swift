@@ -172,7 +172,7 @@ struct SubscriptionServiceTests {
         defer { try? FileManager.default.removeItem(at: tmpDir) }
         let manager = try DatabaseManager(ruta: tmpDir.appendingPathComponent("s.sqlite"))
         let subRepo = SQLiteSubscriptionRepository(manager: manager)
-        let svc = SubscriptionService(manager: manager, subRepo: subRepo)
+        let svc = SubscriptionService(manager: manager, subRepo: subRepo, transactionRepo: SQLiteTransactionRepository(manager: manager))
 
         let nuevo = try await svc.crear(Suscripcion(
             concepto: "Netflix", monto: 199, categoria: "Entretenimiento",
@@ -202,7 +202,7 @@ struct SubscriptionServiceTests {
         defer { try? FileManager.default.removeItem(at: tmpDir) }
         let manager = try DatabaseManager(ruta: tmpDir.appendingPathComponent("c.sqlite"))
         let subRepo = SQLiteSubscriptionRepository(manager: manager)
-        let svc = SubscriptionService(manager: manager, subRepo: subRepo)
+        let svc = SubscriptionService(manager: manager, subRepo: subRepo, transactionRepo: SQLiteTransactionRepository(manager: manager))
 
         let inicio = FormatoFecha.parsearFecha("2026-01-15")!
         let cobro = FormatoFecha.parsearFecha("2026-02-15")!
@@ -226,7 +226,7 @@ struct SubscriptionServiceTests {
         defer { try? FileManager.default.removeItem(at: tmpDir) }
         let manager = try DatabaseManager(ruta: tmpDir.appendingPathComponent("a.sqlite"))
         let subRepo = SQLiteSubscriptionRepository(manager: manager)
-        let svc = SubscriptionService(manager: manager, subRepo: subRepo)
+        let svc = SubscriptionService(manager: manager, subRepo: subRepo, transactionRepo: SQLiteTransactionRepository(manager: manager))
 
         let s = try await svc.crear(Suscripcion(
             concepto: "X", monto: 100, categoria: "Y",
@@ -245,7 +245,7 @@ struct SubscriptionServiceTests {
         defer { try? FileManager.default.removeItem(at: tmpDir) }
         let manager = try DatabaseManager(ruta: tmpDir.appendingPathComponent("p.sqlite"))
         let subRepo = SQLiteSubscriptionRepository(manager: manager)
-        let svc = SubscriptionService(manager: manager, subRepo: subRepo)
+        let svc = SubscriptionService(manager: manager, subRepo: subRepo, transactionRepo: SQLiteTransactionRepository(manager: manager))
 
         let ahora = Date()
         let manana = Calendar.current.date(byAdding: .day, value: 1, to: ahora)!
@@ -278,7 +278,8 @@ struct SubscriptionServiceTests {
         let manager = try DatabaseManager(ruta: tmpDir.appendingPathComponent("v.sqlite"))
         let svc = SubscriptionService(
             manager: manager,
-            subRepo: SQLiteSubscriptionRepository(manager: manager)
+            subRepo: SQLiteSubscriptionRepository(manager: manager),
+            transactionRepo: SQLiteTransactionRepository(manager: manager)
         )
 
         do {

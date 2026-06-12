@@ -59,7 +59,7 @@ struct TransactApp: App {
                 Button(LocalizableKey.menuArchivoHistorial.localized()) {
                     navegacion.navegar(.historial)
                 }
-                .keyboardShortcut("h", modifiers: [.command, .shift])
+                .keyboardShortcut("h", modifiers: [.command, .option])
 
                 Button(LocalizableKey.menuArchivoSuscripciones.localized()) {
                     navegacion.navegar(.suscripciones)
@@ -115,7 +115,7 @@ struct TransactApp: App {
                 Button(LocalizableKey.menuHerramientasCambiarDenominaciones.localized()) {
                     navegacion.abrirHoja(.cambioBillete)
                 }
-                .keyboardShortcut("b", modifiers: .command)
+                .keyboardShortcut("b", modifiers: [.command, .shift])
 
                 Divider()
 

@@ -73,6 +73,7 @@ final class RootCoordinator: ObservableObject {
     @Published var dashboardViewModel: DashboardViewModel?
     @Published var proyeccionViewModel: ProyeccionViewModel?
     @Published var simuladorViewModel: SimuladorGastosViewModel?
+    private var simuladorContextoTask: Task<Void, Never>?
     let busquedaGlobal: BusquedaGlobalCoordinator
 
     init(busquedaGlobal: BusquedaGlobalCoordinator) {
@@ -130,7 +131,8 @@ final class RootCoordinator: ObservableObject {
             initialBalanceRepo: env.initialBalance,
             projectionService: env.projectionService
         )
-        Task { await simulador.cargarContexto() }
+        simuladorContextoTask?.cancel()
+        simuladorContextoTask = Task { await simulador.cargarContexto() }
         self.dashboardViewModel = vm
         self.proyeccionViewModel = proyeccion
         self.simuladorViewModel = simulador
@@ -146,6 +148,8 @@ final class RootCoordinator: ObservableObject {
     }
 
     func reiniciar() async {
+        simuladorContextoTask?.cancel()
+        simuladorContextoTask = nil
         environment?.cancelarObservador()
         environment = nil
         saldoInicialViewModel = nil

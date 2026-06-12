@@ -9,6 +9,7 @@ public protocol TransactionRepository: Sendable {
     func actualizar(_ transaccion: Transaccion) async throws -> Transaccion
     func eliminar(id: Int64) async throws
     func buscar(texto: String) async throws -> [Transaccion]
+    func buscarGlobal(texto: String) async throws -> [Transaccion]
     func listarFiltrado(
         mes: Date?,
         tipo: TipoTransaccion?,
@@ -83,8 +84,19 @@ public final class SQLiteTransactionRepository: TransactionRepository, @unchecke
         }
     }
 
+    public func buscarGlobal(texto: String) async throws -> [Transaccion] {
+        let patron = "%\(texto.escapadoLike)%"
+        return try await manager.leer { db in
+            let records = try TransaccionRecord
+                .filter(Column("concepto").like(patron) || Column("categoria").like(patron))
+                .order(Column("fecha").desc, Column("hora").desc)
+                .fetchAll(db)
+            return records.compactMap { $0.aModelo() }
+        }
+    }
+
     public func buscar(texto: String) async throws -> [Transaccion] {
-        let patron = "%\(texto)%"
+        let patron = "%\(texto.escapadoLike)%"
         return try await manager.leer { db in
             let records = try TransaccionRecord
                 .filter(Column("concepto").like(patron))
@@ -123,7 +135,7 @@ public final class SQLiteTransactionRepository: TransactionRepository, @unchecke
             }
 
             if let texto, !texto.isEmpty {
-                let patron = "%\(texto)%"
+                let patron = "%\(texto.escapadoLike)%"
                 request = request.filter(Column("concepto").like(patron))
             }
 
@@ -179,5 +191,13 @@ public final class SQLiteTransactionRepository: TransactionRepository, @unchecke
 
     public func eliminarEn(db: GRDB.Database, id: Int64) throws {
         try TransaccionRecord.deleteOne(db, key: id)
+    }
+}
+
+private extension String {
+    var escapadoLike: String {
+        replacingOccurrences(of: "\\", with: "\\\\")
+            .replacingOccurrences(of: "%", with: "\\%")
+            .replacingOccurrences(of: "_", with: "\\_")
     }
 }

@@ -9,7 +9,7 @@ struct TransaccionRecord: Codable, FetchableRecord, MutablePersistableRecord {
     var fecha: String
     var hora: String
     var concepto: String
-    var monto: Double
+    var monto: Int64
     var tipo: String
     var categoria: String
     var metodo: String
@@ -20,7 +20,7 @@ struct TransaccionRecord: Codable, FetchableRecord, MutablePersistableRecord {
         fecha: String,
         hora: String,
         concepto: String,
-        monto: Double,
+        monto: Int64,
         tipo: String,
         categoria: String,
         metodo: String,
@@ -46,7 +46,7 @@ struct TransaccionRecord: Codable, FetchableRecord, MutablePersistableRecord {
         self.fecha = FormatoFecha.formatearFecha(transaccion.fecha)
         self.hora = FormatoFecha.formatearHora(transaccion.hora)
         self.concepto = transaccion.concepto
-        self.monto = NSDecimalNumber(decimal: transaccion.monto).doubleValue
+        self.monto = transaccion.monto.centavos
         self.tipo = transaccion.tipo.rawValue
         self.categoria = transaccion.categoria
         self.metodo = transaccion.metodo.rawValue
@@ -66,7 +66,7 @@ struct TransaccionRecord: Codable, FetchableRecord, MutablePersistableRecord {
               let horaDate = FormatoFecha.parsearHora(hora) else {
             return nil
         }
-        let montoDecimal = Decimal(monto)
+        let montoDecimal = monto.aDecimal
         var desgloseStruct: DesgloseBilletes?
         if let json = desglose, let data = json.data(using: .utf8) {
             desgloseStruct = try? JSONDecoder().decode(DesgloseBilletes.self, from: data)
@@ -116,22 +116,22 @@ struct PrestamoRecord: Codable, FetchableRecord, MutablePersistableRecord {
     var id: Int64?
     var persona: String
     var concepto: String
-    var monto: Double
+    var monto: Int64
     var tipo: String
     var fecha: String
     var afectaBalance: Int
-    var montoPagado: Double
+    var montoPagado: Int64
     var notas: String?
 
     init(
         id: Int64? = nil,
         persona: String,
         concepto: String,
-        monto: Double,
+        monto: Int64,
         tipo: String,
         fecha: String,
         afectaBalance: Int,
-        montoPagado: Double = 0,
+        montoPagado: Int64 = 0,
         notas: String? = nil
     ) {
         self.id = id
@@ -153,11 +153,11 @@ struct PrestamoRecord: Codable, FetchableRecord, MutablePersistableRecord {
         self.id = prestamo.id
         self.persona = prestamo.persona
         self.concepto = prestamo.concepto
-        self.monto = NSDecimalNumber(decimal: prestamo.monto).doubleValue
+        self.monto = prestamo.monto.centavos
         self.tipo = prestamo.tipo.rawValue
         self.fecha = FormatoFecha.formatearFecha(prestamo.fecha)
         self.afectaBalance = prestamo.afectaBalance ? 1 : 0
-        self.montoPagado = NSDecimalNumber(decimal: prestamo.montoPagado).doubleValue
+        self.montoPagado = prestamo.montoPagado.centavos
         self.notas = prestamo.notas
     }
 
@@ -168,11 +168,11 @@ struct PrestamoRecord: Codable, FetchableRecord, MutablePersistableRecord {
             id: id,
             persona: persona,
             concepto: concepto,
-            monto: Decimal(monto),
+            monto: monto.aDecimal,
             tipo: tipoEnum,
             fecha: fechaDate,
             afectaBalance: afectaBalance != 0,
-            montoPagado: Decimal(montoPagado),
+            montoPagado: montoPagado.aDecimal,
             notas: notas
         )
     }
@@ -183,7 +183,7 @@ struct SuscripcionRecord: Codable, FetchableRecord, MutablePersistableRecord {
 
     var id: Int64?
     var concepto: String
-    var monto: Double
+    var monto: Int64
     var categoria: String
     var frecuencia: String
     var tipo: String
@@ -197,7 +197,7 @@ struct SuscripcionRecord: Codable, FetchableRecord, MutablePersistableRecord {
     init(
         id: Int64? = nil,
         concepto: String,
-        monto: Double,
+        monto: Int64,
         categoria: String,
         frecuencia: String,
         tipo: String,
@@ -229,7 +229,7 @@ struct SuscripcionRecord: Codable, FetchableRecord, MutablePersistableRecord {
     init(_ s: Suscripcion) {
         self.id = s.id
         self.concepto = s.concepto
-        self.monto = NSDecimalNumber(decimal: s.monto).doubleValue
+        self.monto = s.monto.centavos
         self.categoria = s.categoria
         self.frecuencia = s.frecuencia.rawValue
         self.tipo = s.tipo.rawValue
@@ -251,7 +251,7 @@ struct SuscripcionRecord: Codable, FetchableRecord, MutablePersistableRecord {
         return Suscripcion(
             id: id,
             concepto: concepto,
-            monto: Decimal(monto),
+            monto: monto.aDecimal,
             categoria: categoria,
             frecuencia: frecuenciaEnum,
             tipo: tipoEnum,
@@ -269,12 +269,12 @@ struct SaldoInicialRecord: Codable, FetchableRecord, PersistableRecord {
     static let databaseTableName = EsquemaColumnas.SaldoInicial.tabla
 
     var id: Int
-    var efectivo: Double
-    var tarjeta: Double
+    var efectivo: Int64
+    var tarjeta: Int64
     var fechaCreacion: String
     var inventarioJson: String
 
-    init(id: Int = 1, efectivo: Double, tarjeta: Double, fechaCreacion: String, inventarioJson: String) {
+    init(id: Int = 1, efectivo: Int64, tarjeta: Int64, fechaCreacion: String, inventarioJson: String) {
         self.id = id
         self.efectivo = efectivo
         self.tarjeta = tarjeta
@@ -284,8 +284,8 @@ struct SaldoInicialRecord: Codable, FetchableRecord, PersistableRecord {
 
     init(_ s: SaldoInicial, inventario: [Inventario]) {
         self.id = 1
-        self.efectivo = NSDecimalNumber(decimal: s.efectivo).doubleValue
-        self.tarjeta = NSDecimalNumber(decimal: s.tarjeta).doubleValue
+        self.efectivo = s.efectivo.centavos
+        self.tarjeta = s.tarjeta.centavos
         self.fechaCreacion = FormatoFecha.formatearFechaHora(s.fechaCreacion)
         let records = inventario.map { InventarioRecord($0) }
         if let data = try? JSONEncoder().encode(records),
@@ -304,8 +304,8 @@ struct SaldoInicialRecord: Codable, FetchableRecord, PersistableRecord {
             return records.compactMap { $0.aModelo() }
         }()
         return SaldoInicial(
-            efectivo: Decimal(efectivo),
-            tarjeta: Decimal(tarjeta),
+            efectivo: efectivo.aDecimal,
+            tarjeta: tarjeta.aDecimal,
             fechaCreacion: fecha,
             inventarioInicial: inventario
         )
@@ -317,4 +317,20 @@ struct MetadataRecord: Codable, FetchableRecord, PersistableRecord {
 
     var clave: String
     var valor: String
+}
+
+extension Decimal {
+    var centavos: Int64 {
+        var resultado = Decimal()
+        var copia = self
+        NSDecimalRound(&resultado, &copia, 2, .bankers)
+        let cents = resultado * 100
+        return NSDecimalNumber(decimal: cents).int64Value
+    }
+}
+
+extension Int64 {
+    var aDecimal: Decimal {
+        Decimal(self) / 100
+    }
 }

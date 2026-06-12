@@ -57,7 +57,7 @@ struct FormularioTransaccionView: View {
             }
         }
         .task { await viewModel.cargarCategorias() }
-        .onChange(of: viewModel.guardado) { nuevo in
+        .onChange(of: viewModel.guardado) { _, nuevo in
             if nuevo { onCerrar() }
         }
     }

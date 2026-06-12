@@ -230,4 +230,38 @@ struct ReportesServiceTests {
         )
         #expect(reporte.proyeccion != nil)
     }
+
+    @Test("Compilar reporte calcula balances reales desde transacciones y saldo inicial")
+    func compilarReporteConBalances() async throws {
+        let (_, service, txRepo, loanRepo, subRepo) = try await preparar()
+        let ref = fecha(2026, 6, 10)
+        let inicioJunio = Calendar(identifier: .gregorian).date(from: DateComponents(year: 2026, month: 6, day: 1))!
+        let hora = FormatoFecha.parsearHora("10:00")!
+
+        _ = try await txRepo.insertar(Transaccion(
+            id: nil, fecha: inicioJunio, hora: hora,
+            concepto: "Sueldo", monto: 5000,
+            tipo: .ingreso, categoria: "Trabajo", metodo: .tarjeta
+        ))
+        _ = try await txRepo.insertar(Transaccion(
+            id: nil, fecha: inicioJunio, hora: hora,
+            concepto: "Comida", monto: 200,
+            tipo: .gasto, categoria: "Comida", metodo: .efectivo
+        ))
+        _ = try await loanRepo.insertar(Prestamo(
+            id: nil, persona: "Banco", concepto: "TC",
+            monto: 1500, tipo: .debo, fecha: inicioJunio, afectaBalance: true
+        ))
+
+        let reporte = try await service.compilarReporte(
+            parametros: ParametrosReporte(mes: ref),
+            referencia: ref
+        )
+
+        #expect(reporte.datos.saldoEfectivo != 0)
+        #expect(reporte.datos.saldoTarjeta != 0)
+        #expect(reporte.datos.balanceTotal != 0)
+        #expect(reporte.datos.totalDeudas != 0)
+        #expect(reporte.datos.balanceReal != 0)
+    }
 }

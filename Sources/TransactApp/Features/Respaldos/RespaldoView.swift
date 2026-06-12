@@ -140,7 +140,7 @@ public struct RespaldoView: View {
     private var actionsBar: some View {
         HStack(spacing: TemaEspaciado.m) {
             PrimaryButton(LocalizableKey.respaldoCrear.localized(), icono: "square.and.arrow.down") {
-                viewModel.crearRespaldo()
+                Task { await viewModel.crearRespaldo() }
             }
             GhostButton(LocalizableKey.respaldoImportar.localized(), icono: "square.and.arrow.up") {
                 _ = viewModel.importar()

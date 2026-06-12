@@ -81,9 +81,9 @@ public struct ConfiguracionProyeccion: Sendable, Equatable {
     public var horizonteMeses: Int
 
     public init(
-        ingresoMensualBase: Decimal = 900,
-        factorDiario: Decimal = 30,
-        claveTito: String = "tito",
+        ingresoMensualBase: Decimal = 0,
+        factorDiario: Decimal = 0,
+        claveTito: String = "",
         horizonteMeses: Int = 18
     ) {
         self.ingresoMensualBase = ingresoMensualBase

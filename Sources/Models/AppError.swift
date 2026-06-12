@@ -114,11 +114,11 @@ public struct AppError: LocalizedError, Identifiable, Equatable, Sendable {
     ) -> String {
         switch category {
         case .critical:
-            return "Algo salió mal"
+            return LocalizableKey.errorAceptarTitulo.localized()
         case .warning:
-            return "Atención"
+            return LocalizableKey.errorWarningTitulo.localized()
         case .info:
-            return "Información"
+            return LocalizableKey.errorInfoTitulo.localized()
         }
     }
 }

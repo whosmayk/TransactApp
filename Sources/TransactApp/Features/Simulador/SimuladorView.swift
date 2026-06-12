@@ -45,10 +45,10 @@ struct SimuladorView: View {
                         .fill(AppColor.peach.opacity(0.15))
                 )
             VStack(alignment: .leading, spacing: 0) {
-                Text("Simulador de gastos")
+                Text(LocalizableKey.dashboardSimulador.localized())
                     .font(Tipografia.subtitulo())
                     .foregroundColor(AppColor.text)
-                Text("¿Qué pasaría si…?")
+                Text(LocalizableKey.dashboardSimuladorSubtitulo.localized())
                     .font(.caption)
                     .foregroundColor(AppColor.subtext0)
             }
@@ -57,13 +57,13 @@ struct SimuladorView: View {
     }
 
     private var selectorTipo: some View {
-        Picker("Escenario", selection: $viewModel.tipoSeleccionado) {
+        Picker(LocalizableKey.dashboardSimuladorEscenario.localized(), selection: $viewModel.tipoSeleccionado) {
             ForEach(SimuladorGastosViewModel.TipoEscenario.allCases) { tipo in
                 Label(tipo.rawValue, systemImage: tipo.icono).tag(tipo)
             }
         }
         .pickerStyle(.menu)
-        .onChange(of: viewModel.tipoSeleccionado) { _ in
+        .onChange(of: viewModel.tipoSeleccionado) { _, _ in
             viewModel.restablecer()
         }
     }
@@ -85,17 +85,17 @@ struct SimuladorView: View {
     private var inputsGastoUnico: some View {
         HStack(spacing: TemaEspaciado.m) {
             VStack(alignment: .leading, spacing: TemaEspaciado.xs) {
-                Text("Monto")
+                Text(LocalizableKey.formTxSeccionMonto.localized())
                     .font(.caption)
                     .foregroundColor(AppColor.subtext0)
                 HStack(spacing: 4) {
-                    Text("$").foregroundColor(AppColor.subtext1)
+                    Text(LocalizableKey.montoPrefijo.localized()).foregroundColor(AppColor.subtext1)
                     TextField("0", text: $viewModel.montoTexto)
                         .textFieldStyle(.roundedBorder)
                 }
             }
             VStack(alignment: .leading, spacing: TemaEspaciado.xs) {
-                Text("Método")
+                Text(LocalizableKey.formTxMetodo.localized())
                     .font(.caption)
                     .foregroundColor(AppColor.subtext0)
                 Picker("", selection: $viewModel.metodo) {
@@ -111,11 +111,11 @@ struct SimuladorView: View {
 
     private var inputsCancelarSuscripcion: some View {
         VStack(alignment: .leading, spacing: TemaEspaciado.xs) {
-            Text("Suscripción a cancelar")
+            Text(LocalizableKey.simuladorSuscripcionACancelar.localized())
                 .font(.caption)
                 .foregroundColor(AppColor.subtext0)
             if viewModel.suscripciones.isEmpty {
-                Text("No tienes suscripciones activas.")
+                Text(LocalizableKey.simuladorSinSuscripciones.localized())
                     .font(.caption)
                     .foregroundColor(AppColor.subtext0)
             } else {
@@ -135,10 +135,10 @@ struct SimuladorView: View {
         VStack(alignment: .leading, spacing: TemaEspaciado.s) {
             HStack(spacing: TemaEspaciado.m) {
                 VStack(alignment: .leading, spacing: TemaEspaciado.xs) {
-                    Text("Concepto")
+                    Text(LocalizableKey.formTxConcepto.localized())
                         .font(.caption)
                         .foregroundColor(AppColor.subtext0)
-                    TextField("Ej: Spotify", text: $viewModel.conceptoNueva)
+                    TextField(LocalizableKey.simuladorPlaceholderConcepto.localized(), text: $viewModel.conceptoNueva)
                         .textFieldStyle(.roundedBorder)
                 }
                 VStack(alignment: .leading, spacing: TemaEspaciado.xs) {
@@ -153,7 +153,7 @@ struct SimuladorView: View {
                 }
             }
             VStack(alignment: .leading, spacing: TemaEspaciado.xs) {
-                Text("Frecuencia")
+                Text(LocalizableKey.formSubFrecuencia.localized())
                     .font(.caption)
                     .foregroundColor(AppColor.subtext0)
                 Picker("", selection: $viewModel.frecuenciaNueva) {
@@ -170,7 +170,7 @@ struct SimuladorView: View {
     private var inputsReducirCategoria: some View {
         HStack(spacing: TemaEspaciado.m) {
             VStack(alignment: .leading, spacing: TemaEspaciado.xs) {
-                Text("Categoría")
+                Text(LocalizableKey.commonCategoria.localized())
                     .font(.caption)
                     .foregroundColor(AppColor.subtext0)
                 if let categorias = viewModel.contextoActual?.categorias, !categorias.isEmpty {
@@ -182,13 +182,13 @@ struct SimuladorView: View {
                     .pickerStyle(.menu)
                     .labelsHidden()
                 } else {
-                    Text("Sin categorías con histórico.")
+                    Text(LocalizableKey.simuladorSinCategorias.localized())
                         .font(.caption)
                         .foregroundColor(AppColor.subtext0)
                 }
             }
             VStack(alignment: .leading, spacing: TemaEspaciado.xs) {
-                Text("Reducir %")
+                Text(LocalizableKey.simuladorReducirPorcentaje.localized())
                     .font(.caption)
                     .foregroundColor(AppColor.subtext0)
                 HStack(spacing: 4) {
@@ -208,12 +208,12 @@ struct SimuladorView: View {
                 Button {
                     viewModel.restablecer()
                 } label: {
-                    Label("Restablecer", systemImage: "arrow.uturn.backward")
+                    Label(LocalizableKey.simuladorRestablecer.localized(), systemImage: "arrow.uturn.backward")
                 }
                 .buttonStyle(.borderless)
                 .foregroundColor(AppColor.subtext0)
             }
-            PrimaryButton("Simular", icono: "wand.and.stars") {
+            PrimaryButton(LocalizableKey.simuladorSimular.localized(), icono: "wand.and.stars") {
                 viewModel.simular()
             }
             .frame(maxWidth: 160)
@@ -234,14 +234,14 @@ struct SimuladorView: View {
         VStack(alignment: .leading, spacing: TemaEspaciado.s) {
             HStack(alignment: .firstTextBaseline, spacing: TemaEspaciado.l) {
                 columna(
-                    titulo: "Saldo actual",
+                    titulo: LocalizableKey.simuladorSaldoActual.localized(),
                     valor: r.resumenActual.balanceTotal,
                     color: AppColor.text
                 )
                 Image(systemName: "arrow.right")
                     .foregroundColor(AppColor.subtext0)
                 columna(
-                    titulo: "Quedaría",
+                    titulo: LocalizableKey.simuladorQuedaria.localized(),
                     valor: r.resumenSimulado.balanceTotal,
                     color: colorPara(resultado: r)
                 )
@@ -249,20 +249,20 @@ struct SimuladorView: View {
 
             HStack(spacing: TemaEspaciado.l) {
                 miniStat(
-                    titulo: "Impacto inmediato",
+                    titulo: LocalizableKey.simuladorImpactoInmediato.localized(),
                     valor: r.impactoInmediato,
                     prefijo: true
                 )
                 if r.impactoMensualRecurrente != 0 {
                     miniStat(
-                        titulo: "Impacto mensual",
+                        titulo: LocalizableKey.simuladorImpactoMensual.localized(),
                         valor: r.impactoMensualRecurrente,
                         prefijo: true
                     )
                 }
                 if r.impacto12Meses != 0 {
                     miniStat(
-                        titulo: "En 12 meses",
+                        titulo: LocalizableKey.simuladorEn12Meses.localized(),
                         valor: r.impacto12Meses,
                         prefijo: true
                     )
@@ -270,7 +270,7 @@ struct SimuladorView: View {
             }
 
             if let promedio = r.desgloseCategoria {
-                Text("Promedio actual en la categoría: \(textoMoneda(promedio)) al mes")
+                Text(LocalizableKey.simuladorPromedioCategoria.localized(textoMoneda(promedio)))
                     .font(.caption)
                     .foregroundColor(AppColor.subtext0)
             }

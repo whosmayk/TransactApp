@@ -48,7 +48,8 @@ public final class AppEnvironment: ObservableObject {
         self.loanService = LoanService(manager: database, loanRepo: self.loans)
         self.subscriptionService = SubscriptionService(
             manager: database,
-            subRepo: self.subscriptions
+            subRepo: self.subscriptions,
+            transactionRepo: self.transactions
         )
         self.configurationService = ConfigurationService(repo: self.configuration)
         self.projectionService = ProjectionService()
@@ -62,9 +63,10 @@ public final class AppEnvironment: ObservableObject {
             configurationService: self.configurationService,
             projectionService: self.projectionService
         )
+        let versionApp = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.0.0"
         self.backupService = BackupService(
             database: database,
-            versionApp: "0.6.0"
+            versionApp: versionApp
         )
         self.busquedaGlobalService = BusquedaGlobalService(
             transactions: self.transactions,

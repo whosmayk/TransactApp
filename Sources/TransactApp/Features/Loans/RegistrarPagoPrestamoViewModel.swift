@@ -86,8 +86,12 @@ final class RegistrarPagoPrestamoViewModel: ObservableObject {
                 desglose: desgloseFinal
             )
 
+            guard let prestamoId = prestamo.id else {
+                error = "Prestamo no encontrado"
+                return
+            }
             try await loanService.registrarPagoConTransaccion(
-                prestamoId: prestamo.id!,
+                prestamoId: prestamoId,
                 montoPago: montoPago.valor,
                 transaccion: transaccion,
                 transactionRepo: transactionRepo,

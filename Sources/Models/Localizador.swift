@@ -4,29 +4,41 @@ public enum Localizador {
     public static let identificadorPorDefecto = "es_MX"
     public static let codigoMoneda = "MXN"
 
+    private static let monedaFormatter: NumberFormatter = {
+        let f = NumberFormatter()
+        f.numberStyle = .currency
+        f.locale = localeActual
+        f.currencyCode = codigoMoneda
+        f.maximumFractionDigits = 2
+        f.minimumFractionDigits = 2
+        return f
+    }()
+
+    private static let monedaCortaFormatter: NumberFormatter = {
+        let f = NumberFormatter()
+        f.numberStyle = .currency
+        f.locale = localeActual
+        f.currencyCode = codigoMoneda
+        f.maximumFractionDigits = 0
+        f.minimumFractionDigits = 0
+        return f
+    }()
+
     public static var localeActual: Locale {
         Locale(identifier: UserDefaults.standard.string(forKey: "TransactApp.Locale")
                 ?? identificadorPorDefecto)
     }
 
     public static func moneda(_ monto: Decimal, locale: Locale = localeActual) -> String {
-        let f = NumberFormatter()
-        f.numberStyle = .currency
+        let f = monedaFormatter
         f.locale = locale
-        f.currencyCode = codigoMoneda
-        f.maximumFractionDigits = 2
-        f.minimumFractionDigits = 2
         let ns = NSDecimalNumber(decimal: monto)
         return f.string(from: ns) ?? "\(monto)"
     }
 
     public static func monedaCorta(_ monto: Decimal, locale: Locale = localeActual) -> String {
-        let f = NumberFormatter()
-        f.numberStyle = .currency
+        let f = monedaCortaFormatter
         f.locale = locale
-        f.currencyCode = codigoMoneda
-        f.maximumFractionDigits = 0
-        f.minimumFractionDigits = 0
         let ns = NSDecimalNumber(decimal: monto)
         return f.string(from: ns) ?? "\(monto)"
     }

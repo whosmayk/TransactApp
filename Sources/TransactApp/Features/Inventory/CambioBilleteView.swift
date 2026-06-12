@@ -66,37 +66,6 @@ public struct CambioBilleteView: View {
         .padding(.vertical, TemaEspaciado.s)
     }
 
-    private var inventarioActual: some View {
-        VStack(alignment: .leading, spacing: TemaEspaciado.s) {
-            Text(LocalizableKey.cambioBilleteInventarioActual.localized())
-                .font(Tipografia.subtitulo())
-                .foregroundColor(AppColor.subtext1)
-            let columnas = [GridItem(.flexible(), spacing: TemaEspaciado.s),
-                            GridItem(.flexible(), spacing: TemaEspaciado.s),
-                            GridItem(.flexible(), spacing: TemaEspaciado.s),
-                            GridItem(.flexible(), spacing: TemaEspaciado.s)]
-            LazyVGrid(columns: columnas, spacing: TemaEspaciado.s) {
-                ForEach(viewModel.inventario) { item in
-                    HStack {
-                        Text("$\(item.denominacion)")
-                            .font(Tipografia.cuerpo())
-                            .foregroundColor(AppColor.text)
-                        Spacer()
-                        Text("× \(item.cantidad)")
-                            .font(Tipografia.cuerpo())
-                            .foregroundColor(AppColor.green)
-                    }
-                    .padding(.horizontal, TemaEspaciado.s)
-                    .padding(.vertical, TemaEspaciado.xs)
-                    .background(
-                        RoundedRectangle(cornerRadius: TemaRadio.s)
-                            .fill(AppColor.surface0)
-                    )
-                }
-            }
-        }
-    }
-
     private var seccionOrigen: some View {
         seccionBilletes(
             titulo: LocalizableKey.cambioBilleteQuitar.localized(),

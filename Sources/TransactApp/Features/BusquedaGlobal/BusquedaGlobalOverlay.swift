@@ -72,7 +72,7 @@ struct BusquedaGlobalOverlay: View {
         .sheet(
             item: Binding(
                 get: { coordinator.seleccion },
-                set: { nuevo in if nuevo == nil { coordinator.cerrarSeleccion() } }
+                set: { nuevo in if nuevo == nil { return } }
             ),
             onDismiss: { coordinator.cerrarSeleccion() }
         ) { resultado in

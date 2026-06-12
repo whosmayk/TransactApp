@@ -135,8 +135,8 @@ public enum WindowsDatabaseImporter {
                     SELECT efectivo, tarjeta, fechaCreacion, inventarioJson FROM SaldoInicial
                     """) else { return nil }
                 return SaldoInicialOrigen(
-                    efectivo: fila["efectivo"] ?? 0,
-                    tarjeta: fila["tarjeta"] ?? 0,
+                    efectivo: Double(fila["efectivo"] as Int64? ?? 0) / 100,
+                    tarjeta: Double(fila["tarjeta"] as Int64? ?? 0) / 100,
                     fechaCreacion: fila["fechaCreacion"] ?? "",
                     inventarioJson: fila["inventarioJson"] ?? "[]"
                 )
@@ -164,23 +164,24 @@ public enum WindowsDatabaseImporter {
                               (id, efectivo, tarjeta, fechaCreacion, inventarioJson)
                             VALUES (1,?,?,?,?)
                             """, arguments: [
-                                previo.efectivo, previo.tarjeta,
+                                Int64(round(previo.efectivo * 100)),
+                                Int64(round(previo.tarjeta * 100)),
                                 previo.fechaCreacion, previo.inventarioJson
                             ])
                         sInicial = true
                     }
                 case .ajustarAReal:
                     guard let real = balanceReal else { break }
-                    let deltaEf = try Double.fetchOne(dest, sql: """
+                    let deltaEfCents = try Int64.fetchOne(dest, sql: """
                         SELECT COALESCE(SUM(CASE WHEN tipo='Ingreso' THEN monto ELSE -monto END), 0)
                         FROM Transacciones WHERE metodo='Efectivo'
                         """) ?? 0
-                    let deltaTj = try Double.fetchOne(dest, sql: """
+                    let deltaTjCents = try Int64.fetchOne(dest, sql: """
                         SELECT COALESCE(SUM(CASE WHEN tipo='Ingreso' THEN monto ELSE -monto END), 0)
                         FROM Transacciones WHERE metodo='Tarjeta'
                         """) ?? 0
-                    let nuevoEf = real.efectivo - deltaEf
-                    let nuevoTj = real.tarjeta - deltaTj
+                    let nuevoEfCents = Int64(round(real.efectivo * 100)) - deltaEfCents
+                    let nuevoTjCents = Int64(round(real.tarjeta * 100)) - deltaTjCents
                     let inventarioJson = saldoPrevio?.inventarioJson ?? "[]"
                     let fechaCreacion = saldoPrevio?.fechaCreacion
                         ?? FormatoFecha.formatearFechaHora(Date())
@@ -188,7 +189,7 @@ public enum WindowsDatabaseImporter {
                         INSERT OR REPLACE INTO SaldoInicial
                           (id, efectivo, tarjeta, fechaCreacion, inventarioJson)
                         VALUES (1,?,?,?,?)
-                        """, arguments: [nuevoEf, nuevoTj, fechaCreacion, inventarioJson])
+                        """, arguments: [nuevoEfCents, nuevoTjCents, fechaCreacion, inventarioJson])
                     sInicial = true
                 }
                 return ResultadoImportacionWindows(
@@ -276,7 +277,7 @@ public enum WindowsDatabaseImporter {
                 VALUES (?,?,?,?,?,?,?,?)
                 """, arguments: [
                     fechaStr, horaTruncada, fila["Concepto"] ?? "",
-                    abs(fila["Monto"] ?? 0.0), fila["Tipo"] ?? "Gasto",
+                    Int64(round(abs(fila["Monto"] ?? 0.0) * 100)), fila["Tipo"] ?? "Gasto",
                     fila["Categoria"] ?? "", fila["Metodo"] ?? "Efectivo",
                     desglose
                 ])
@@ -293,7 +294,9 @@ public enum WindowsDatabaseImporter {
         var insertadas = 0
         for fila in filas {
             let denomStr: String = fila["Denominacion"] ?? "0"
-            let denom = Int(denomStr.trimmingCharacters(in: .whitespaces)) ?? 0
+            guard let denom = Int(denomStr.trimmingCharacters(in: .whitespaces)), denom > 0 else {
+                continue
+            }
             let cant: Int = fila["Cantidad"] ?? 0
             try dest.execute(sql: """
                 INSERT OR REPLACE INTO InventarioEfectivo (denominacion, cantidad, actualizadoEn)
@@ -326,8 +329,8 @@ public enum WindowsDatabaseImporter {
                 VALUES (?,?,?,?,?,?,?,?)
                 """, arguments: [
                     fila["Persona"] ?? "", fila["Concepto"] ?? "",
-                    fila["Monto"] ?? 0.0, tipo,
-                    fila["Fecha"] ?? "", afectaBalance, 0.0, nil
+                    Int64(round((fila["Monto"] ?? 0.0) * 100)), tipo,
+                    fila["Fecha"] ?? "", afectaBalance, 0, nil
                 ])
             insertadas += 1
         }
@@ -350,9 +353,9 @@ public enum WindowsDatabaseImporter {
             let tipoOriginal: String = fila["Tipo"] ?? ""
             let tipoFinal: String
             let decision: MapeoSuscripcion
-            if TipoTransaccion(rawValue: tipoOriginal) != nil {
+            if let tipoValido = TipoTransaccion(rawValue: tipoOriginal) {
                 tipoFinal = tipoOriginal
-                decision = .gasto
+                decision = tipoValido == .ingreso ? .ingreso : .gasto
             } else if let m = mapeo[idOrigen] {
                 switch m {
                 case .ingreso: tipoFinal = "Ingreso"; decision = .ingreso
@@ -370,7 +373,7 @@ public enum WindowsDatabaseImporter {
                    proximoCobro, notas, duracionMeses, activa, notificado)
                 VALUES (?,?,?,?,?,?,?,?,?,?,?)
                 """, arguments: [
-                    fila["Concepto"] ?? "", fila["Monto"] ?? 0.0,
+                    fila["Concepto"] ?? "", Int64(round((fila["Monto"] ?? 0.0) * 100)),
                     fila["Categoria"] ?? "", fila["Frecuencia"] ?? "Mensual",
                     tipoFinal,
                     fila["FechaInicio"] ?? "", fila["ProximaFechaCobro"] ?? "",
@@ -400,7 +403,7 @@ public enum WindowsDatabaseImporter {
             INSERT OR REPLACE INTO SaldoInicial
               (id, efectivo, tarjeta, fechaCreacion, inventarioJson)
             VALUES (1,?,?,?,?)
-            """, arguments: [efectivo, tarjeta, ahora, "[]"])
+            """, arguments: [Int64(round(efectivo * 100)), Int64(round(tarjeta * 100)), ahora, "[]"])
         return true
     }
 

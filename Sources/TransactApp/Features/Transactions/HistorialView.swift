@@ -30,12 +30,12 @@ struct HistorialView: View {
         .background(AppColor.base)
         .navigationTitle(LocalizableKey.historialTitulo.localized())
         .searchable(text: $viewModel.texto, prompt: LocalizableKey.historialBuscar.localized())
-        .onChange(of: viewModel.texto) { _ in scheduleReload() }
-        .onChange(of: viewModel.tipoFiltro) { _ in scheduleReload() }
-        .onChange(of: viewModel.categoriaFiltro) { _ in scheduleReload() }
-        .onChange(of: viewModel.mesFiltro) { _ in scheduleReload() }
-        .onChange(of: viewModel.usarFiltroMes) { _ in scheduleReload() }
-        .onChange(of: viewModel.orden) { _ in scheduleReload() }
+        .onChange(of: viewModel.texto) { _, _ in scheduleReload() }
+        .onChange(of: viewModel.tipoFiltro) { _, _ in scheduleReload() }
+        .onChange(of: viewModel.categoriaFiltro) { _, _ in scheduleReload() }
+        .onChange(of: viewModel.mesFiltro) { _, _ in scheduleReload() }
+        .onChange(of: viewModel.usarFiltroMes) { _, _ in scheduleReload() }
+        .onChange(of: viewModel.orden) { _, _ in scheduleReload() }
         .task { await viewModel.cargar() }
         .refreshable { await viewModel.cargar() }
         .sheet(item: $transaccionEditar) { tx in

@@ -9,9 +9,9 @@ public enum AppDatabaseError: LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .esquemaInvalido(let mensaje):
-            return "Esquema de base de datos inválido: \(mensaje)"
+            return "Esquema de base de datos invalido: \(mensaje)"
         case .filaNoEncontrada:
-            return "No se encontró la fila solicitada."
+            return "No se encontro la fila solicitada."
         case .errorSQL(let underlying):
             return "Error de base de datos: \(underlying.localizedDescription)"
         }
@@ -20,12 +20,19 @@ public enum AppDatabaseError: LocalizedError {
 
 public final class DatabaseManager: @unchecked Sendable {
     public let ruta: URL
-    public private(set) var dbQueue: DatabaseQueue
+    private var _dbQueue: DatabaseQueue
+    private let lock = NSLock()
+
+    public var dbQueue: DatabaseQueue {
+        lock.lock()
+        defer { lock.unlock() }
+        return _dbQueue
+    }
 
     public init(ruta: URL) throws {
         self.ruta = ruta
-        self.dbQueue = try Self.crearCola(ruta: ruta)
-        try Migrator.aplicar(dbQueue)
+        self._dbQueue = try Self.crearCola(ruta: ruta)
+        try Migrator.aplicar(_dbQueue)
     }
 
     public static func rutaPorDefecto() throws -> URL {
@@ -48,32 +55,36 @@ public final class DatabaseManager: @unchecked Sendable {
         return try DatabaseManager(ruta: ruta)
     }
 
-    /// Crea un `DatabaseObserver` vinculado a la cola actual.
-    /// Llamar de nuevo después de `reemplazarArchivo(desde:)` para re-suscribirse.
     public func crearObservador(debounceMs: Int = 150) -> DatabaseObserver {
         DatabaseObserver(dbQueue: dbQueue, debounceMs: debounceMs)
     }
 
     public func escribir<T: Sendable>(_ bloque: @escaping @Sendable (Database) throws -> T) async throws -> T {
-        try await dbQueue.write { db in
+        let cola = dbQueue
+        return try await cola.write { db in
             try bloque(db)
         }
     }
 
     public func leer<T: Sendable>(_ bloque: @escaping @Sendable (Database) throws -> T) async throws -> T {
-        try await dbQueue.read { db in
+        let cola = dbQueue
+        return try await cola.read { db in
             try bloque(db)
         }
     }
 
     public func cerrar() throws {
         let actual = dbQueue
-        dbQueue = try Self.crearColaVacia()
+        lock.lock()
+        _dbQueue = try Self.crearColaVacia()
+        lock.unlock()
         _ = actual
     }
 
     public func reabrir() throws {
-        dbQueue = try Self.crearCola(ruta: ruta)
+        lock.lock()
+        _dbQueue = try Self.crearCola(ruta: ruta)
+        lock.unlock()
     }
 
     public func reemplazarArchivo(desde origen: URL) throws {
@@ -97,13 +108,14 @@ public final class DatabaseManager: @unchecked Sendable {
 
         try reabrir()
 
+        let cola = dbQueue
         do {
-            _ = try dbQueue.read { db in
+            _ = try cola.read { db in
                 try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM sqlite_master") ?? 0
             }
         } catch {
             throw AppDatabaseError.esquemaInvalido(
-                mensaje: "La base de datos restaurada no es válida: \(error.localizedDescription)"
+                mensaje: "La base de datos restaurada no es valida: \(error.localizedDescription)"
             )
         }
     }

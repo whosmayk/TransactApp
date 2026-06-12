@@ -14,7 +14,7 @@ struct SubscriptionNotifierTests {
         defer { try? FileManager.default.removeItem(at: tmpDir) }
         let manager = try DatabaseManager(ruta: tmpDir.appendingPathComponent("notif.sqlite"))
         let subRepo = SQLiteSubscriptionRepository(manager: manager)
-        let svc = SubscriptionService(manager: manager, subRepo: subRepo)
+        let svc = SubscriptionService(manager: manager, subRepo: subRepo, transactionRepo: SQLiteTransactionRepository(manager: manager))
         let notifier = SubscriptionNotifier(service: svc, ventana: 3)
 
         let ahora = Date()
@@ -51,7 +51,7 @@ struct SubscriptionNotifierTests {
         defer { try? FileManager.default.removeItem(at: tmpDir) }
         let manager = try DatabaseManager(ruta: tmpDir.appendingPathComponent("notif2.sqlite"))
         let subRepo = SQLiteSubscriptionRepository(manager: manager)
-        let svc = SubscriptionService(manager: manager, subRepo: subRepo)
+        let svc = SubscriptionService(manager: manager, subRepo: subRepo, transactionRepo: SQLiteTransactionRepository(manager: manager))
         let notifier = SubscriptionNotifier(service: svc, ventana: 3)
 
         let ahora = Date()

@@ -10,6 +10,7 @@ final class GestionPrestamosViewModel: ObservableObject {
     @Published var prestamos: [Prestamo] = []
     @Published var cargando: Bool = false
     @Published var error: String?
+    private var necesitaRecarga = false
 
     let service: LoanService
     let transactionService: TransactionService
@@ -48,10 +49,19 @@ final class GestionPrestamosViewModel: ObservableObject {
     }
 
     func cargar() async {
-        guard !cargando else { return }
+        guard !cargando else {
+            necesitaRecarga = true
+            return
+        }
         cargando = true
         error = nil
-        defer { cargando = false }
+        defer {
+            cargando = false
+            if necesitaRecarga {
+                necesitaRecarga = false
+                Task { await cargar() }
+            }
+        }
         do {
             prestamos = try await loanRepo.listar()
         } catch {

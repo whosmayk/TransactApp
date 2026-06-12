@@ -22,6 +22,7 @@ public final class BackupService: @unchecked Sendable {
     private let esquemaActual: Int
     private let versionApp: String
     private let retencionAutomatica: Int
+    private let metadatosLock = NSLock()
 
     public init(
         database: DatabaseManager,
@@ -35,7 +36,11 @@ public final class BackupService: @unchecked Sendable {
         self.versionApp = versionApp
         self.esquemaActual = esquemaActual
         self.retencionAutomatica = retencionAutomatica
-        try? FileManager.default.createDirectory(at: self.directorioRespaldos, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: self.directorioRespaldos, withIntermediateDirectories: true)
+        } catch {
+            print("[BackupService] No se pudo crear el directorio de respaldos: \(error.localizedDescription)")
+        }
     }
 
     public static func directorioPorDefecto() -> URL {
@@ -243,6 +248,9 @@ public final class BackupService: @unchecked Sendable {
         }
 
         let longitudVersion = Int(datos.leerUInt32(en: &offset))
+        guard longitudVersion <= 1024 else {
+            throw BackupError.formatoInvalido
+        }
         guard datos.count >= offset + longitudVersion + 4 + 8 + 8 else {
             throw BackupError.formatoInvalido
         }
@@ -358,6 +366,8 @@ public final class BackupService: @unchecked Sendable {
     }
 
     private func escribirMetadatosLado(_ respaldo: Respaldo) {
+        metadatosLock.lock()
+        defer { metadatosLock.unlock() }
         var dict = leerMetadatosLado()
         let json = RespaldoJSON(
             id: respaldo.id,
@@ -375,6 +385,8 @@ public final class BackupService: @unchecked Sendable {
     }
 
     private func eliminarMetadatosLado(nombre: String) {
+        metadatosLock.lock()
+        defer { metadatosLock.unlock() }
         var dict = leerMetadatosLado()
         dict[nombre] = nil
         if let datos = try? JSONEncoder().encode(dict) {

@@ -3,7 +3,7 @@ import GRDB
 
 public enum Migrator {
     public static let claveVersion = "db_version"
-    public static let versionActual: Int = 4
+    public static let versionActual: Int = 5
 
     public static func aplicar(_ dbQueue: DatabaseQueue) throws {
         var migrator = DatabaseMigrator()
@@ -94,6 +94,60 @@ public enum Migrator {
                 """)
         }
 
+        migrator.registerMigration("v5_montos_a_centavos") { db in
+            let tablasMontos = [
+                ("Transacciones", "monto"),
+                ("Prestamos", "monto"),
+                ("Prestamos", "montoPagado"),
+                ("Suscripciones", "monto"),
+                ("SaldoInicial", "efectivo"),
+                ("SaldoInicial", "tarjeta"),
+            ]
+            for (tabla, columna) in tablasMontos {
+                let tempCol = "\(columna)_temp"
+                try db.execute(sql: """
+                    ALTER TABLE \(tabla) ADD COLUMN \(tempCol) INTEGER NOT NULL DEFAULT 0;
+                    """)
+                try db.execute(sql: """
+                    UPDATE \(tabla) SET \(tempCol) = CAST(ROUND(\(columna) * 100) AS INTEGER);
+                    """)
+                try db.execute(sql: """
+                    ALTER TABLE \(tabla) DROP COLUMN \(columna);
+                    """)
+                try db.execute(sql: """
+                    ALTER TABLE \(tabla) RENAME COLUMN \(tempCol) TO \(columna);
+                    """)
+            }
+        }
+
         try migrator.migrate(dbQueue)
+    }
+
+    public static func revertirV5(_ dbQueue: DatabaseQueue) throws {
+        try dbQueue.writeWithoutTransaction { db in
+            let tablasMontos = [
+                ("Transacciones", "monto"),
+                ("Prestamos", "monto"),
+                ("Prestamos", "montoPagado"),
+                ("Suscripciones", "monto"),
+                ("SaldoInicial", "efectivo"),
+                ("SaldoInicial", "tarjeta"),
+            ]
+            for (tabla, columna) in tablasMontos {
+                let tempCol = "\(columna)_temp"
+                try db.execute(sql: """
+                    ALTER TABLE \(tabla) ADD COLUMN \(tempCol) REAL NOT NULL DEFAULT 0;
+                    """)
+                try db.execute(sql: """
+                    UPDATE \(tabla) SET \(tempCol) = CAST(\(columna) AS REAL) / 100.0;
+                    """)
+                try db.execute(sql: """
+                    ALTER TABLE \(tabla) DROP COLUMN \(columna);
+                    """)
+                try db.execute(sql: """
+                    ALTER TABLE \(tabla) RENAME COLUMN \(tempCol) TO \(columna);
+                    """)
+            }
+        }
     }
 }

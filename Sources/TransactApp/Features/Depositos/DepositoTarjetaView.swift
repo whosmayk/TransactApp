@@ -11,10 +11,10 @@ struct DepositoTarjetaView: View {
         VStack(spacing: TemaEspaciado.l) {
             HStack {
                 VStack(alignment: .leading, spacing: TemaEspaciado.xs) {
-                    Text("Depósito a tarjeta")
+                    Text(LocalizableKey.depositoTarjetaTitulo.localized())
                         .font(Tipografia.titulo())
                         .foregroundColor(AppColor.text)
-                    Text("Retira efectivo y abona a tu tarjeta en un solo paso")
+                    Text(LocalizableKey.depositoTarjetaDesc.localized())
                         .font(Tipografia.cuerpo())
                         .foregroundColor(AppColor.subtext1)
                 }
@@ -59,19 +59,19 @@ struct DepositoTarjetaView: View {
                     }
 
                     CampoMontoField(
-                        titulo: "Monto a depositar",
+                        titulo: LocalizableKey.depositoTarjetaMonto.localized(),
                         placeholder: "0",
                         texto: $viewModel.monto.texto
                     )
 
                     HStack(spacing: TemaEspaciado.m) {
-                        Label("Se descuenta de:", systemImage: "arrow.down.circle")
+                        Label(LocalizableKey.depositoTarjetaDescuenta.localized(), systemImage: "arrow.down.circle")
                             .font(Tipografia.subtitulo())
                             .foregroundColor(AppColor.subtext1)
                         HStack(spacing: TemaEspaciado.xs) {
                             Image(systemName: "banknote.fill")
                                 .foregroundColor(AppColor.green)
-                            Text("Efectivo")
+                            Text(LocalizableKey.enumMetodoEfectivo.localized())
                                 .font(Tipografia.subtitulo())
                                 .foregroundColor(AppColor.text)
                         }
@@ -80,7 +80,7 @@ struct DepositoTarjetaView: View {
                         HStack(spacing: TemaEspaciado.xs) {
                             Image(systemName: "creditcard.fill")
                                 .foregroundColor(AppColor.sapphire)
-                            Text("Tarjeta")
+                            Text(LocalizableKey.enumMetodoTarjeta.localized())
                                 .font(Tipografia.subtitulo())
                                 .foregroundColor(AppColor.text)
                         }
@@ -103,9 +103,9 @@ struct DepositoTarjetaView: View {
             }
 
             HStack(spacing: TemaEspaciado.m) {
-                GhostButton("Cancelar", icono: "xmark") { onCerrar() }
+                GhostButton(LocalizableKey.commonCancelar.localized(), icono: "xmark") { onCerrar() }
                 PrimaryButton(
-                    "Depositar",
+                    LocalizableKey.depositoTarjetaBoton.localized(),
                     icono: "arrow.right.circle",
                     habilitado: viewModel.esValido && !viewModel.guardando
                 ) {

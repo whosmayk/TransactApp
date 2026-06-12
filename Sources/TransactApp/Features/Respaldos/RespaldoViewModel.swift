@@ -39,10 +39,12 @@ public final class RespaldoViewModel: ObservableObject {
         }
     }
 
-    public func crearRespaldo() {
+    public func crearRespaldo() async {
         estado = .trabajando
         do {
-            let respaldo = try service.crearRespaldo()
+            let respaldo = try await Task.detached(priority: .userInitiated) { [service] in
+                try service.crearRespaldo()
+            }.value
             cargar()
             estado = .exito(LocalizableKey.respaldoCreado.localized(respaldo.nombreArchivo))
         } catch {
@@ -92,8 +94,8 @@ public final class RespaldoViewModel: ObservableObject {
                         SELECT efectivo, tarjeta, fechaCreacion, inventarioJson FROM SaldoInicial
                         """) else { return nil }
                     return SnapshotSaldo(
-                        efectivo: fila["efectivo"] ?? 0,
-                        tarjeta: fila["tarjeta"] ?? 0,
+                        efectivo: Double(fila["efectivo"] as Int64? ?? 0) / 100,
+                        tarjeta: Double(fila["tarjeta"] as Int64? ?? 0) / 100,
                         fechaCreacion: fila["fechaCreacion"] ?? "",
                         inventarioJson: fila["inventarioJson"] ?? "[]"
                     )
@@ -117,35 +119,36 @@ public final class RespaldoViewModel: ObservableObject {
                               (id, efectivo, tarjeta, fechaCreacion, inventarioJson)
                             VALUES (1, ?, ?, ?, ?)
                             """, arguments: [
-                                previo.efectivo, previo.tarjeta,
+                                Int64(round(previo.efectivo * 100)),
+                                Int64(round(previo.tarjeta * 100)),
                                 previo.fechaCreacion, previo.inventarioJson
                             ])
                     }
                 }
             case .ajustarAReal:
                 guard let real = balanceReal else { break }
-                let deltaEf = try await database.leer { db in
-                    try Double.fetchOne(db, sql: """
+                let deltaEfCents = try await database.leer { db in
+                    try Int64.fetchOne(db, sql: """
                         SELECT COALESCE(SUM(CASE WHEN tipo='Ingreso' THEN monto ELSE -monto END), 0)
                         FROM Transacciones WHERE metodo='Efectivo'
                         """) ?? 0
                 }
-                let deltaTj = try await database.leer { db in
-                    try Double.fetchOne(db, sql: """
+                let deltaTjCents = try await database.leer { db in
+                    try Int64.fetchOne(db, sql: """
                         SELECT COALESCE(SUM(CASE WHEN tipo='Ingreso' THEN monto ELSE -monto END), 0)
                         FROM Transacciones WHERE metodo='Tarjeta'
                         """) ?? 0
                 }
                 let fechaSnap = saldoPrevio?.fechaCreacion ?? ""
                 let inventarioSnap = saldoPrevio?.inventarioJson ?? "[]"
-                let nuevoEf = real.efectivo - deltaEf
-                let nuevoTj = real.tarjeta - deltaTj
+                let nuevoEfCents = Int64(round(real.efectivo * 100)) - deltaEfCents
+                let nuevoTjCents = Int64(round(real.tarjeta * 100)) - deltaTjCents
                 try await database.escribir { db in
                     try db.execute(sql: """
                         INSERT OR REPLACE INTO SaldoInicial
                           (id, efectivo, tarjeta, fechaCreacion, inventarioJson)
                         VALUES (1, ?, ?, ?, ?)
-                        """, arguments: [nuevoEf, nuevoTj, fechaSnap, inventarioSnap])
+                        """, arguments: [nuevoEfCents, nuevoTjCents, fechaSnap, inventarioSnap])
                 }
             }
             let msg: String

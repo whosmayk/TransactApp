@@ -154,7 +154,7 @@ struct BusquedaGlobalView: View {
                                     onSeleccionar(resultado)
                                 }
                                 .padding(.horizontal, TemaEspaciado.l)
-                                .onChange(of: viewModel.indiceSeleccionado) { nuevo in
+                                .onChange(of: viewModel.indiceSeleccionado) { _, nuevo in
                                     if nuevo == indicePlano,
                                        let id = opcionalIndice(nuevo) {
                                         withAnimation(.easeInOut(duration: 0.15)) {

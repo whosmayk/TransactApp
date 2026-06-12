@@ -303,6 +303,75 @@ struct SimuladorGastosServiceTests {
         #expect(contexto.suscripcionesActivas.count == 2)
         #expect(contexto.suscripcionesActivas.allSatisfy { $0.activa })
     }
+
+    @Test("Cancelar suscripcion reduce totalGastos en resumen simulado")
+    func cancelarSuscripcionActualizaGastos() async throws {
+        let tmpDir = try directorioTemporal()
+        defer { try? FileManager.default.removeItem(at: tmpDir) }
+        let manager = try DatabaseManager(ruta: tmpDir.appendingPathComponent("sim.sqlite"))
+        let subRepo = SQLiteSubscriptionRepository(manager: manager)
+
+        let ahora = Date()
+        let susc = try await subRepo.insertar(Suscripcion(
+            id: nil, concepto: "Netflix", monto: 199,
+            categoria: "Ocio", frecuencia: .mensual, tipo: .gasto,
+            fechaInicio: ahora, proximoCobro: ahora
+        ))
+        let contexto = ContextoSimulacion(
+            resumen: resumenBase(),
+            suscripciones: [susc],
+            transacciones: [],
+            mesesHistorico: 3
+        )
+        let resultado = SimuladorGastosService().simular(
+            escenario: .cancelarSuscripcion(suscripcionId: susc.id!),
+            contexto: contexto
+        )
+        guard case .success(let r) = resultado else {
+            Issue.record("Debio ser success")
+            return
+        }
+        #expect(r.resumenSimulado.totalGastos == r.resumenActual.totalGastos - susc.montoMensual())
+    }
+
+    @Test("Nueva suscripcion aumenta totalGastos en resumen simulado")
+    func nuevaSuscripcionActualizaGastos() {
+        let contexto = contextoBase()
+        let resultado = SimuladorGastosService().simular(
+            escenario: .nuevaSuscripcion(concepto: "Spotify", monto: 149, frecuencia: .mensual),
+            contexto: contexto
+        )
+        guard case .success(let r) = resultado else {
+            Issue.record("Debio ser success")
+            return
+        }
+        #expect(r.resumenSimulado.totalGastos == r.resumenActual.totalGastos + 149)
+    }
+
+    @Test("Reducir categoria actualiza totalGastos en resumen simulado")
+    func reducirCategoriaActualizaGastos() {
+        let ahora = Date()
+        let tx = Transaccion(
+            id: nil, fecha: ahora, hora: ahora,
+            concepto: "Cena", monto: 500,
+            tipo: .gasto, categoria: "Comida", metodo: .efectivo
+        )
+        let contexto = ContextoSimulacion(
+            resumen: resumenBase(),
+            suscripciones: [],
+            transacciones: [tx],
+            mesesHistorico: 1
+        )
+        let resultado = SimuladorGastosService().simular(
+            escenario: .reducirCategoria(categoria: "Comida", porcentaje: 50),
+            contexto: contexto
+        )
+        guard case .success(let r) = resultado else {
+            Issue.record("Debio ser success")
+            return
+        }
+        #expect(r.resumenSimulado.totalGastos < r.resumenActual.totalGastos)
+    }
 }
 
 private func resumenBase() -> ResumenFinanciero {
@@ -313,6 +382,7 @@ private func resumenBase() -> ResumenFinanciero {
         saldoTarjeta: 1000,
         balanceTotal: 2000,
         totalDeudas: 0,
+        totalMeDeben: 0,
         balanceReal: 2000,
         totalIngresos: 0,
         totalGastos: 0

@@ -49,19 +49,25 @@ public enum DatabaseImporter {
                     }
                 case .ajustarAReal:
                     guard let real = balanceReal else { break }
-                    let deltaEf = try Double.fetchOne(dest, sql: """
+                    let deltaEfCents = try Int64.fetchOne(dest, sql: """
                         SELECT COALESCE(SUM(CASE WHEN tipo='Ingreso' THEN monto ELSE -monto END), 0)
                         FROM Transacciones WHERE metodo='Efectivo'
                         """) ?? 0
-                    let deltaTj = try Double.fetchOne(dest, sql: """
+                    let deltaTjCents = try Int64.fetchOne(dest, sql: """
                         SELECT COALESCE(SUM(CASE WHEN tipo='Ingreso' THEN monto ELSE -monto END), 0)
                         FROM Transacciones WHERE metodo='Tarjeta'
                         """) ?? 0
+                    let fechaCreacion: String
+                    if let previo = saldoPrevio, !previo.fechaCreacion.isEmpty {
+                        fechaCreacion = previo.fechaCreacion
+                    } else {
+                        fechaCreacion = FormatoFecha.formatearFechaHora(Date())
+                    }
                     let nueva = SaldoInicialRecord(
                         id: 1,
-                        efectivo: real.efectivo - deltaEf,
-                        tarjeta: real.tarjeta - deltaTj,
-                        fechaCreacion: saldoPrevio?.fechaCreacion ?? "",
+                        efectivo: Int64(round(real.efectivo * 100)) - deltaEfCents,
+                        tarjeta: Int64(round(real.tarjeta * 100)) - deltaTjCents,
+                        fechaCreacion: fechaCreacion,
                         inventarioJson: saldoPrevio?.inventarioJson ?? "[]"
                     )
                     try nueva.insert(dest, onConflict: .replace)

@@ -36,7 +36,10 @@ final class UpdateCoordinator: ObservableObject, @unchecked Sendable {
 
         let feedString = Bundle.main.object(forInfoDictionaryKey: "SUFeedURL") as? String
             ?? "https://whosmayk.github.io/TransactApp/appcast.json"
-        self.feedURL = URL(string: feedString)!
+        guard let url = URL(string: feedString) else {
+            fatalError("SUFeedURL contains an invalid URL: \(feedString)")
+        }
+        self.feedURL = url
     }
 
     func check() async {

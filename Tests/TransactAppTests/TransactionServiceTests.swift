@@ -178,4 +178,52 @@ struct TransactionServiceTests {
         let item = try await invRepo.obtener(denominacion: 1000)
         #expect(item?.cantidad == 0)
     }
+
+    @Test("crear rechaza concepto vacio")
+    func crearRechazaConceptoVacio() async throws {
+        let (_, svc) = try await preparar()
+        let tx = Transaccion(
+            id: nil, fecha: Date(), hora: Date(),
+            concepto: "  ", monto: 100,
+            tipo: .gasto, categoria: "Comida", metodo: .tarjeta
+        )
+        do {
+            _ = try await svc.crear(tx)
+            Issue.record("Debio lanzar error")
+        } catch {
+            #expect((error as? AppDatabaseError) != nil)
+        }
+    }
+
+    @Test("crear rechaza monto cero o negativo")
+    func crearRechazaMontoCero() async throws {
+        let (_, svc) = try await preparar()
+        let tx = Transaccion(
+            id: nil, fecha: Date(), hora: Date(),
+            concepto: "Comida", monto: 0,
+            tipo: .gasto, categoria: "Comida", metodo: .tarjeta
+        )
+        do {
+            _ = try await svc.crear(tx)
+            Issue.record("Debio lanzar error")
+        } catch {
+            #expect((error as? AppDatabaseError) != nil)
+        }
+    }
+
+    @Test("crear rechaza categoria vacia")
+    func crearRechazaCategoriaVacia() async throws {
+        let (_, svc) = try await preparar()
+        let tx = Transaccion(
+            id: nil, fecha: Date(), hora: Date(),
+            concepto: "Comida", monto: 100,
+            tipo: .gasto, categoria: "", metodo: .tarjeta
+        )
+        do {
+            _ = try await svc.crear(tx)
+            Issue.record("Debio lanzar error")
+        } catch {
+            #expect((error as? AppDatabaseError) != nil)
+        }
+    }
 }

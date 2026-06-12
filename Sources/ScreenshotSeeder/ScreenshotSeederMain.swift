@@ -30,7 +30,7 @@ struct ScreenshotSeeder {
             inventoryRepo: invRepo
         )
         let loanSvc = LoanService(manager: manager, loanRepo: loanRepo)
-        let subSvc = SubscriptionService(manager: manager, subRepo: subRepo)
+        let subSvc = SubscriptionService(manager: manager, subRepo: subRepo, transactionRepo: transRepo)
 
         let inventarioInicial: [Inventario] = [
             Inventario(denominacion: 1000, cantidad: 5),

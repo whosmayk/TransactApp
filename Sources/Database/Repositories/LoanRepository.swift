@@ -78,10 +78,10 @@ public final class SQLiteLoanRepository: LoanRepository, @unchecked Sendable {
                 """, arguments: [tipo.rawValue])
             var total: Decimal = 0
             for row in rows {
-                let monto = row["monto"] as Double? ?? 0
-                let pagado = row["montoPagado"] as Double? ?? 0
+                let monto = Decimal(row["monto"] as Int64? ?? 0) / 100
+                let pagado = Decimal(row["montoPagado"] as Int64? ?? 0) / 100
                 let pendiente = max(0, monto - pagado)
-                total += Decimal(pendiente)
+                total += pendiente
             }
             return total
         }
@@ -96,10 +96,10 @@ public final class SQLiteLoanRepository: LoanRepository, @unchecked Sendable {
                 """)
             var total: Decimal = 0
             for row in rows {
-                let monto = row["monto"] as Double? ?? 0
-                let pagado = row["montoPagado"] as Double? ?? 0
+                let monto = Decimal(row["monto"] as Int64? ?? 0) / 100
+                let pagado = Decimal(row["montoPagado"] as Int64? ?? 0) / 100
                 let pendiente = max(0, monto - pagado)
-                total += Decimal(pendiente)
+                total += pendiente
             }
             return total
         }

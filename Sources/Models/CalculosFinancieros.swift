@@ -7,6 +7,7 @@ public struct ResumenFinanciero: Equatable, Sendable {
     public let saldoTarjeta: Decimal
     public let balanceTotal: Decimal
     public let totalDeudas: Decimal
+    public let totalMeDeben: Decimal
     public let balanceReal: Decimal
     public let totalIngresos: Decimal
     public let totalGastos: Decimal
@@ -18,6 +19,7 @@ public struct ResumenFinanciero: Equatable, Sendable {
         saldoTarjeta: Decimal,
         balanceTotal: Decimal,
         totalDeudas: Decimal,
+        totalMeDeben: Decimal,
         balanceReal: Decimal,
         totalIngresos: Decimal,
         totalGastos: Decimal
@@ -28,6 +30,7 @@ public struct ResumenFinanciero: Equatable, Sendable {
         self.saldoTarjeta = saldoTarjeta
         self.balanceTotal = balanceTotal
         self.totalDeudas = totalDeudas
+        self.totalMeDeben = totalMeDeben
         self.balanceReal = balanceReal
         self.totalIngresos = totalIngresos
         self.totalGastos = totalGastos
@@ -40,6 +43,7 @@ public struct ResumenFinanciero: Equatable, Sendable {
         saldoTarjeta: 0,
         balanceTotal: 0,
         totalDeudas: 0,
+        totalMeDeben: 0,
         balanceReal: 0,
         totalIngresos: 0,
         totalGastos: 0
@@ -68,8 +72,11 @@ public enum CalculosFinancieros {
 
         let totalDeudas = prestamos
             .filter { $0.tipo == .debo && $0.afectaBalance }
-            .reduce(into: Decimal(0)) { $0 += $1.monto }
-        let balanceReal = balanceTotal - totalDeudas
+            .reduce(into: Decimal(0)) { $0 += $1.saldoPendiente }
+        let totalMeDeben = prestamos
+            .filter { $0.tipo == .meDeben && $0.afectaBalance }
+            .reduce(into: Decimal(0)) { $0 += $1.saldoPendiente }
+        let balanceReal = balanceTotal - totalDeudas + totalMeDeben
 
         let totalIngresos = transacciones
             .filter { $0.tipo == .ingreso }
@@ -85,6 +92,7 @@ public enum CalculosFinancieros {
             saldoTarjeta: saldoTarjeta,
             balanceTotal: balanceTotal,
             totalDeudas: totalDeudas,
+            totalMeDeben: totalMeDeben,
             balanceReal: balanceReal,
             totalIngresos: totalIngresos,
             totalGastos: totalGastos

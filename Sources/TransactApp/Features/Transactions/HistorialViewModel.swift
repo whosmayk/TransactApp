@@ -10,6 +10,7 @@ final class HistorialViewModel: ObservableObject {
     @Published var transacciones: [Transaccion] = []
     @Published var cargando: Bool = false
     @Published var error: String?
+    private var necesitaRecarga = false
     @Published var texto: String = ""
     @Published var tipoFiltro: TipoFiltro = .todos
     @Published var categoriaFiltro: String? = nil
@@ -37,10 +38,19 @@ final class HistorialViewModel: ObservableObject {
     var neto: Decimal { totalIngresos - totalGastos }
 
     func cargar() async {
-        guard !cargando else { return }
+        guard !cargando else {
+            necesitaRecarga = true
+            return
+        }
         cargando = true
         error = nil
-        defer { cargando = false }
+        defer {
+            cargando = false
+            if necesitaRecarga {
+                necesitaRecarga = false
+                Task { await cargar() }
+            }
+        }
 
         do {
             async let listaTask = transactionRepo.listarFiltrado(

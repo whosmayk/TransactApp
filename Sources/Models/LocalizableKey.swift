@@ -509,6 +509,35 @@ public enum LocalizableKey: String, Sendable, CaseIterable {
     case updatesDescargar = "updates.descargar"
     case updatesErrorInstalar = "updates.error.instalar"
     case updatesActualizado = "updates.actualizado"
+
+    case desgloseTitulo = "desglose.titulo"
+    case desgloseAyuda = "desglose.ayuda"
+
+    case depositoTarjetaTitulo = "deposito.tarjeta.titulo"
+    case depositoTarjetaDesc = "deposito.tarjeta.desc"
+    case depositoTarjetaMonto = "deposito.tarjeta.monto"
+    case depositoTarjetaDescuenta = "deposito.tarjeta.descuenta"
+    case depositoTarjetaBoton = "deposito.tarjeta.boton"
+
+    case simuladorSuscripcionACancelar = "simulador.suscripcion_a_cancelar"
+    case simuladorSinSuscripciones = "simulador.sin_suscripciones"
+    case simuladorPlaceholderConcepto = "simulador.placeholder_concepto"
+    case simuladorSinCategorias = "simulador.sin_categorias"
+    case simuladorReducirPorcentaje = "simulador.reducir_porcentaje"
+    case simuladorRestablecer = "simulador.restablecer"
+    case simuladorSimular = "simulador.simular"
+    case simuladorSaldoActual = "simulador.saldo_actual"
+    case simuladorQuedaria = "simulador.quedaria"
+    case simuladorImpactoInmediato = "simulador.impacto_inmediato"
+    case simuladorImpactoMensual = "simulador.impacto_mensual"
+    case simuladorEn12Meses = "simulador.en_12_meses"
+    case simuladorPromedioCategoria = "simulador.promedio_categoria"
+
+    case prestamoPagoMonto = "prestamo.pago.monto"
+    case prestamoPagoDatos = "prestamo.pago.datos"
+    case prestamoPagoRecibir = "prestamo.pago.recibir"
+    case prestamoPagoRealizar = "prestamo.pago.realizar"
+    case prestamoPagoRegistrar = "prestamo.pago.registrar"
 }
 
 private let i18nBundle: Bundle = {
@@ -518,18 +547,18 @@ private let i18nBundle: Bundle = {
     // 1) Production macOS .app (Contents/Resources/)
     if let rsrc = Bundle.main.resourcePath {
         let p = "\(rsrc)/\(name)"
-        if fm.fileExists(atPath: p) { return Bundle(path: p)! }
+        if fm.fileExists(atPath: p), let bundle = Bundle(path: p) { return bundle }
     }
 
     // 2) SPM path 1: main bundle child
     let p1 = Bundle.main.bundleURL.appendingPathComponent(name).path
-    if fm.fileExists(atPath: p1) { return Bundle(path: p1)! }
+    if fm.fileExists(atPath: p1), let bundle = Bundle(path: p1) { return bundle }
 
     // 3) SPM build products relative to CWD (works during `swift test`)
     for arch in ["arm64-apple-macosx", "x86_64-apple-macosx"] {
         for cfg in ["debug", "release"] {
             let p = "\(fm.currentDirectoryPath)/.build/\(arch)/\(cfg)/\(name)"
-            if fm.fileExists(atPath: p) { return Bundle(path: p)! }
+            if fm.fileExists(atPath: p), let bundle = Bundle(path: p) { return bundle }
         }
     }
 
@@ -538,7 +567,7 @@ private let i18nBundle: Bundle = {
     for _ in 0..<15 {
         dir = dir.deletingLastPathComponent()
         let p = dir.appendingPathComponent(name)
-        if fm.fileExists(atPath: p.path) { return Bundle(url: p)! }
+        if fm.fileExists(atPath: p.path), let bundle = Bundle(url: p) { return bundle }
     }
 
     // 5) Last resort: Bundle.module (has hardcoded absolute build path from compile time)

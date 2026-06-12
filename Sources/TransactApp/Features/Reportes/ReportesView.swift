@@ -106,17 +106,17 @@ struct ReportesView: View {
                 .foregroundColor(AppColor.text)
 
             Toggle(LocalizableKey.reportesSeccionResumen.localized(), isOn: $viewModel.incluirResumen)
-                .onChange(of: viewModel.incluirResumen) { _ in viewModel.recargarConOpciones() }
+                .onChange(of: viewModel.incluirResumen) { _, _ in viewModel.recargarConOpciones() }
             Toggle(LocalizableKey.reportesSeccionDetalle.localized(), isOn: $viewModel.incluirDetalleTransacciones)
-                .onChange(of: viewModel.incluirDetalleTransacciones) { _ in viewModel.recargarConOpciones() }
+                .onChange(of: viewModel.incluirDetalleTransacciones) { _, _ in viewModel.recargarConOpciones() }
             Toggle(LocalizableKey.reportesSeccionPrestamos.localized(), isOn: $viewModel.incluirPrestamos)
-                .onChange(of: viewModel.incluirPrestamos) { _ in viewModel.recargarConOpciones() }
+                .onChange(of: viewModel.incluirPrestamos) { _, _ in viewModel.recargarConOpciones() }
             Toggle(LocalizableKey.reportesSeccionSuscripciones.localized(), isOn: $viewModel.incluirSuscripciones)
-                .onChange(of: viewModel.incluirSuscripciones) { _ in viewModel.recargarConOpciones() }
+                .onChange(of: viewModel.incluirSuscripciones) { _, _ in viewModel.recargarConOpciones() }
             Toggle(LocalizableKey.reportesSeccionInventario.localized(), isOn: $viewModel.incluirInventario)
-                .onChange(of: viewModel.incluirInventario) { _ in viewModel.recargarConOpciones() }
+                .onChange(of: viewModel.incluirInventario) { _, _ in viewModel.recargarConOpciones() }
             Toggle(LocalizableKey.reportesSeccionProyeccion.localized(), isOn: $viewModel.incluirProyeccionMes)
-                .onChange(of: viewModel.incluirProyeccionMes) { _ in viewModel.recargarConOpciones() }
+                .onChange(of: viewModel.incluirProyeccionMes) { _, _ in viewModel.recargarConOpciones() }
         }
         .toggleStyle(.switch)
         .foregroundColor(AppColor.subtext1)
