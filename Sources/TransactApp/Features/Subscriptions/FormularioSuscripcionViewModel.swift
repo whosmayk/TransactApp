@@ -41,7 +41,7 @@ final class FormularioSuscripcionViewModel: ObservableObject {
             self.frecuencia = inicial.frecuencia
             self.tipo = inicial.tipo
             self.fechaInicio = inicial.fechaInicio
-            self.duracionMesesTexto = inicial.duracionMeses.map(String.init) ?? ""
+            self.duracionMesesTexto = inicial.duracionMeses.flatMap { $0 > 0 ? String($0) : nil } ?? ""
             self.activa = inicial.activa
             self.notas = inicial.notas ?? ""
         } else {

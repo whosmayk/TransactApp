@@ -367,6 +367,10 @@ public enum WindowsDatabaseImporter {
                 continue
             }
             _ = decision
+            let duracionMesesVal: Int? = {
+                guard let val: Int = fila["DuracionMeses"], val > 0 else { return nil }
+                return val
+            }()
             try dest.execute(sql: """
                 INSERT INTO Suscripciones
                   (concepto, monto, categoria, frecuencia, tipo, fechaInicio,
@@ -377,7 +381,7 @@ public enum WindowsDatabaseImporter {
                     fila["Categoria"] ?? "", fila["Frecuencia"] ?? "Mensual",
                     tipoFinal,
                     fila["FechaInicio"] ?? "", fila["ProximaFechaCobro"] ?? "",
-                    fila["Notas"], fila["DuracionMeses"] ?? 0,
+                    fila["Notas"], duracionMesesVal,
                     fila["Activa"] ?? 1, fila["Notificado"] ?? 0
                 ])
             insertadas += 1

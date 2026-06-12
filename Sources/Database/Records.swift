@@ -258,7 +258,7 @@ struct SuscripcionRecord: Codable, FetchableRecord, MutablePersistableRecord {
             fechaInicio: fechaInicioDate,
             proximoCobro: proximoCobroDate,
             notas: notas,
-            duracionMeses: duracionMeses,
+            duracionMeses: duracionMeses.flatMap { $0 > 0 ? $0 : nil },
             activa: activa != 0,
             notificado: notificado != 0
         )
