@@ -169,11 +169,11 @@ struct GestionPrestamosView: View {
                     .padding(TemaEspaciado.m)
             } else {
                 ForEach(prestamos) { p in
-                    FilaPrestamoView(prestamo: p)
+                    FilaPrestamoView(prestamo: p, onPagar: { prestamoEnPago = p })
                         .onTapGesture { prestamoEnEdicion = p }
                         .contextMenu {
                             Button(LocalizableKey.commonEditar.localized()) { prestamoEnEdicion = p }
-                            Button("Registrar pago", systemImage: "dollarsign.circle") { prestamoEnPago = p }
+                            Button(LocalizableKey.prestamoPagoRegistrar.localized(), systemImage: "dollarsign.circle") { prestamoEnPago = p }
                             Divider()
                             Button(LocalizableKey.commonEliminar.localized(), role: .destructive) {
                                 Task { await viewModel.eliminar(p) }
@@ -187,6 +187,7 @@ struct GestionPrestamosView: View {
 
 private struct FilaPrestamoView: View {
     let prestamo: Prestamo
+    let onPagar: () -> Void
 
     var body: some View {
         HStack(alignment: .top, spacing: TemaEspaciado.m) {
