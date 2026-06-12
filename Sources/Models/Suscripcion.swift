@@ -11,6 +11,7 @@ public struct Suscripcion: Identifiable, Codable, Equatable, Sendable {
     public var proximoCobro: Date
     public var notas: String?
     public var duracionMeses: Int?
+    public var metodoPago: MetodoPago
     public var activa: Bool
     public var notificado: Bool
 
@@ -25,6 +26,7 @@ public struct Suscripcion: Identifiable, Codable, Equatable, Sendable {
         proximoCobro: Date,
         notas: String? = nil,
         duracionMeses: Int? = nil,
+        metodoPago: MetodoPago = .tarjeta,
         activa: Bool = true,
         notificado: Bool = false
     ) {
@@ -38,6 +40,7 @@ public struct Suscripcion: Identifiable, Codable, Equatable, Sendable {
         self.proximoCobro = proximoCobro
         self.notas = notas
         self.duracionMeses = duracionMeses
+        self.metodoPago = metodoPago
         self.activa = activa
         self.notificado = notificado
     }

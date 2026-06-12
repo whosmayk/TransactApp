@@ -69,7 +69,7 @@ public struct SubscriptionService: Sendable {
                 monto: actual.monto,
                 tipo: .gasto,
                 categoria: actual.categoria,
-                metodo: .efectivo
+                metodo: actual.metodoPago
             ))
 
             return actualizada

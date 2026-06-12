@@ -374,14 +374,15 @@ public enum WindowsDatabaseImporter {
             try dest.execute(sql: """
                 INSERT INTO Suscripciones
                   (concepto, monto, categoria, frecuencia, tipo, fechaInicio,
-                   proximoCobro, notas, duracionMeses, activa, notificado)
-                VALUES (?,?,?,?,?,?,?,?,?,?,?)
+                   proximoCobro, notas, duracionMeses, metodoPago, activa, notificado)
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
                 """, arguments: [
                     fila["Concepto"] ?? "", Int64(round((fila["Monto"] ?? 0.0) * 100)),
                     fila["Categoria"] ?? "", fila["Frecuencia"] ?? "Mensual",
                     tipoFinal,
                     fila["FechaInicio"] ?? "", fila["ProximaFechaCobro"] ?? "",
                     fila["Notas"], duracionMesesVal,
+                    "Tarjeta",
                     fila["Activa"] ?? 1, fila["Notificado"] ?? 0
                 ])
             insertadas += 1

@@ -191,6 +191,7 @@ struct SuscripcionRecord: Codable, FetchableRecord, MutablePersistableRecord {
     var proximoCobro: String
     var notas: String?
     var duracionMeses: Int?
+    var metodoPago: String
     var activa: Int
     var notificado: Int
 
@@ -205,6 +206,7 @@ struct SuscripcionRecord: Codable, FetchableRecord, MutablePersistableRecord {
         proximoCobro: String,
         notas: String? = nil,
         duracionMeses: Int? = nil,
+        metodoPago: String = "Tarjeta",
         activa: Int = 1,
         notificado: Int = 0
     ) {
@@ -218,6 +220,7 @@ struct SuscripcionRecord: Codable, FetchableRecord, MutablePersistableRecord {
         self.proximoCobro = proximoCobro
         self.notas = notas
         self.duracionMeses = duracionMeses
+        self.metodoPago = metodoPago
         self.activa = activa
         self.notificado = notificado
     }
@@ -237,6 +240,7 @@ struct SuscripcionRecord: Codable, FetchableRecord, MutablePersistableRecord {
         self.proximoCobro = FormatoFecha.formatearFecha(s.proximoCobro)
         self.notas = s.notas
         self.duracionMeses = s.duracionMeses
+        self.metodoPago = s.metodoPago.rawValue
         self.activa = s.activa ? 1 : 0
         self.notificado = s.notificado ? 1 : 0
     }
@@ -248,6 +252,7 @@ struct SuscripcionRecord: Codable, FetchableRecord, MutablePersistableRecord {
               let proximoCobroDate = FormatoFecha.parsearFecha(proximoCobro) else {
             return nil
         }
+        let metodoPagoEnum = MetodoPago(rawValue: metodoPago) ?? .tarjeta
         return Suscripcion(
             id: id,
             concepto: concepto,
@@ -259,6 +264,7 @@ struct SuscripcionRecord: Codable, FetchableRecord, MutablePersistableRecord {
             proximoCobro: proximoCobroDate,
             notas: notas,
             duracionMeses: duracionMeses.flatMap { $0 > 0 ? $0 : nil },
+            metodoPago: metodoPagoEnum,
             activa: activa != 0,
             notificado: notificado != 0
         )

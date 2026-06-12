@@ -19,6 +19,7 @@ final class FormularioSuscripcionViewModel: ObservableObject {
     @Published var tipo: TipoTransaccion
     @Published var fechaInicio: Date
     @Published var duracionMesesTexto: String
+    @Published var metodoPago: MetodoPago
     @Published var activa: Bool
     @Published var notas: String
     @Published var error: String?
@@ -42,6 +43,7 @@ final class FormularioSuscripcionViewModel: ObservableObject {
             self.tipo = inicial.tipo
             self.fechaInicio = inicial.fechaInicio
             self.duracionMesesTexto = inicial.duracionMeses.flatMap { $0 > 0 ? String($0) : nil } ?? ""
+            self.metodoPago = inicial.metodoPago
             self.activa = inicial.activa
             self.notas = inicial.notas ?? ""
         } else {
@@ -54,6 +56,7 @@ final class FormularioSuscripcionViewModel: ObservableObject {
             let ahora = Date()
             self.fechaInicio = ahora
             self.duracionMesesTexto = ""
+            self.metodoPago = .tarjeta
             self.activa = true
             self.notas = ""
         }
@@ -120,6 +123,7 @@ final class FormularioSuscripcionViewModel: ObservableObject {
                     proximoCobro: proximo,
                     notas: notas.trimmingCharacters(in: .whitespaces).isEmpty ? nil : notas,
                     duracionMeses: duracionEntero(),
+                    metodoPago: metodoPago,
                     activa: activa,
                     notificado: false
                 )
@@ -136,6 +140,7 @@ final class FormularioSuscripcionViewModel: ObservableObject {
                     proximoCobro: original.activa ? proximo : original.proximoCobro,
                     notas: notas.trimmingCharacters(in: .whitespaces).isEmpty ? nil : notas,
                     duracionMeses: duracionEntero(),
+                    metodoPago: metodoPago,
                     activa: activa,
                     notificado: original.notificado
                 )

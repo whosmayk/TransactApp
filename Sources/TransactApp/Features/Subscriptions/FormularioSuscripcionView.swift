@@ -144,6 +144,12 @@ struct FormularioSuscripcionView: View {
                         .fixedSize()
                 }
             }
+            Picker(LocalizableKey.formTxMetodo.localized(), selection: $viewModel.metodoPago) {
+                ForEach(MetodoPago.allCases, id: \.self) { m in
+                    Text(m.titulo).tag(m)
+                }
+            }
+            .pickerStyle(.segmented)
             Toggle(LocalizableKey.formSubActiva.localized(), isOn: $viewModel.activa)
         } footer: {
             Text(LocalizableKey.formSubFooterDuracion.localized())

@@ -3,7 +3,7 @@ import GRDB
 
 public enum Migrator {
     public static let claveVersion = "db_version"
-    public static let versionActual: Int = 5
+    public static let versionActual: Int = 6
 
     public static func aplicar(_ dbQueue: DatabaseQueue) throws {
         var migrator = DatabaseMigrator()
@@ -118,6 +118,12 @@ public enum Migrator {
                     ALTER TABLE \(tabla) RENAME COLUMN \(tempCol) TO \(columna);
                     """)
             }
+        }
+
+        migrator.registerMigration("v6_metodo_pago_suscripciones") { db in
+            try db.execute(sql: """
+                ALTER TABLE Suscripciones ADD COLUMN metodoPago TEXT NOT NULL DEFAULT 'Tarjeta';
+                """)
         }
 
         try migrator.migrate(dbQueue)
