@@ -1,7 +1,0 @@
-{
-  "latestVersion": "0.6.1",
-  "downloadUrl": "https://github.com/whosmayk/TransactApp/releases/download/v0.6.1/TransactApp.zip",
-  "releaseNotes": "Fix: URLSession sin cache para detectar actualizaciones correctamente.",
-  "minimumOSVersion": "14.0",
-  "pubDate": "2026-06-12T06:35:00Z"
-}
