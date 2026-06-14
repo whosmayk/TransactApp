@@ -3,7 +3,7 @@ import GRDB
 
 public enum Migrator {
     public static let claveVersion = "db_version"
-    public static let versionActual: Int = 6
+    public static let versionActual: Int = 8
 
     public static func aplicar(_ dbQueue: DatabaseQueue) throws {
         var migrator = DatabaseMigrator()
@@ -123,6 +123,97 @@ public enum Migrator {
         migrator.registerMigration("v6_metodo_pago_suscripciones") { db in
             try db.execute(sql: """
                 ALTER TABLE Suscripciones ADD COLUMN metodoPago TEXT NOT NULL DEFAULT 'Tarjeta';
+                """)
+        }
+
+        migrator.registerMigration("v7_columnas_sync") { db in
+            for (tabla, necesitaUUID) in [
+                ("Transacciones", true),
+                ("Prestamos", true),
+                ("Suscripciones", true),
+                ("InventarioEfectivo", false),
+                ("SaldoInicial", true),
+                ("Configuracion", false)
+            ] {
+                try db.execute(sql: """
+                    ALTER TABLE \(tabla) ADD COLUMN updated_at BIGINT NOT NULL DEFAULT 0;
+                    """)
+                try db.execute(sql: """
+                    ALTER TABLE \(tabla) ADD COLUMN sync_status INT NOT NULL DEFAULT 0;
+                    """)
+                try db.execute(sql: """
+                    ALTER TABLE \(tabla) ADD COLUMN is_deleted INT NOT NULL DEFAULT 0;
+                    """)
+
+                if necesitaUUID {
+                    try db.execute(sql: """
+                        ALTER TABLE \(tabla) ADD COLUMN uuid TEXT;
+                        """)
+                    try db.execute(sql: """
+                        UPDATE \(tabla) SET uuid = 
+                            substr(hex(randomblob(4)), 1, 8) || '-' ||
+                            substr(hex(randomblob(2)), 1, 4) || '-' ||
+                            substr(hex(randomblob(2)), 1, 4) || '-' ||
+                            substr(hex(randomblob(2)), 1, 4) || '-' ||
+                            substr(hex(randomblob(6)), 1, 12)
+                        WHERE uuid IS NULL;
+                        """)
+                    try db.execute(sql: """
+                        CREATE UNIQUE INDEX IF NOT EXISTS idx_\(tabla.lowercased())_uuid ON \(tabla)(uuid);
+                        """)
+                }
+            }
+
+            // SaldoInicial: id=1 ya no es singleton estricto, pero se mantiene para compatibilidad
+            try db.execute(sql: """
+                ALTER TABLE SaldoInicial RENAME TO SaldoInicialVieja;
+                """)
+            try db.execute(sql: """
+                CREATE TABLE IF NOT EXISTS SaldoInicial (
+                    id INTEGER PRIMARY KEY,
+                    efectivo BIGINT NOT NULL DEFAULT 0,
+                    tarjeta BIGINT NOT NULL DEFAULT 0,
+                    fechaCreacion TEXT NOT NULL,
+                    inventarioJson TEXT NOT NULL DEFAULT '[]',
+                    uuid TEXT,
+                    updated_at BIGINT NOT NULL DEFAULT 0,
+                    sync_status INT NOT NULL DEFAULT 0,
+                    is_deleted INT NOT NULL DEFAULT 0
+                );
+                """)
+            try db.execute(sql: """
+                INSERT INTO SaldoInicial (id, efectivo, tarjeta, fechaCreacion, inventarioJson, uuid)
+                SELECT id, efectivo, tarjeta, fechaCreacion, inventarioJson,
+                    substr(hex(randomblob(4)), 1, 8) || '-' ||
+                    substr(hex(randomblob(2)), 1, 4) || '-' ||
+                    substr(hex(randomblob(2)), 1, 4) || '-' ||
+                    substr(hex(randomblob(2)), 1, 4) || '-' ||
+                    substr(hex(randomblob(6)), 1, 12)
+                FROM SaldoInicialVieja;
+                """)
+            try db.execute(sql: """
+                DROP TABLE SaldoInicialVieja;
+                """)
+            try db.execute(sql: """
+                CREATE UNIQUE INDEX IF NOT EXISTS idx_saldoinicial_uuid ON SaldoInicial(uuid);
+                """)
+        }
+
+        migrator.registerMigration("v8_inventario_uuid") { db in
+            try db.execute(sql: """
+                ALTER TABLE InventarioEfectivo ADD COLUMN uuid TEXT;
+                """)
+            try db.execute(sql: """
+                UPDATE InventarioEfectivo SET uuid =
+                    substr(hex(randomblob(4)), 1, 8) || '-' ||
+                    substr(hex(randomblob(2)), 1, 4) || '-' ||
+                    substr(hex(randomblob(2)), 1, 4) || '-' ||
+                    substr(hex(randomblob(2)), 1, 4) || '-' ||
+                    substr(hex(randomblob(6)), 1, 12)
+                WHERE uuid IS NULL;
+                """)
+            try db.execute(sql: """
+                CREATE UNIQUE INDEX IF NOT EXISTS idx_inventarioefectivo_uuid ON InventarioEfectivo(uuid);
                 """)
         }
 

@@ -1,6 +1,6 @@
 import Foundation
 
-public struct Suscripcion: Identifiable, Codable, Equatable, Sendable {
+public struct Suscripcion: Identifiable, Codable, Equatable, Sendable, Syncable {
     public var id: Int64?
     public var concepto: String
     public var monto: Decimal
@@ -14,6 +14,9 @@ public struct Suscripcion: Identifiable, Codable, Equatable, Sendable {
     public var metodoPago: MetodoPago
     public var activa: Bool
     public var notificado: Bool
+    public var uuid: String
+    public var updatedAt: Date
+    public var isDeleted: Bool
 
     public init(
         id: Int64? = nil,
@@ -28,7 +31,10 @@ public struct Suscripcion: Identifiable, Codable, Equatable, Sendable {
         duracionMeses: Int? = nil,
         metodoPago: MetodoPago = .tarjeta,
         activa: Bool = true,
-        notificado: Bool = false
+        notificado: Bool = false,
+        uuid: String? = nil,
+        updatedAt: Date = Date(),
+        isDeleted: Bool = false
     ) {
         self.id = id
         self.concepto = concepto
@@ -43,6 +49,9 @@ public struct Suscripcion: Identifiable, Codable, Equatable, Sendable {
         self.metodoPago = metodoPago
         self.activa = activa
         self.notificado = notificado
+        self.uuid = uuid ?? Self.generarUUID()
+        self.updatedAt = updatedAt
+        self.isDeleted = isDeleted
     }
 
     public func montoMensual() -> Decimal {

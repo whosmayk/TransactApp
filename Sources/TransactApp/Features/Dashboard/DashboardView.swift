@@ -62,11 +62,8 @@ struct DashboardView: View {
                 await proyeccionViewModel.cargar()
                 ultimaActualizacion = .now
             }
-            .onChange(of: viewModel.resumen.balanceTotal) { _, _ in
-                ultimaActualizacion = .now
-            }
-            .onChange(of: viewModel.ingresosMes) { _, _ in
-                ultimaActualizacion = .now
+            .onChange(of: viewModel.cargando) { _, nuevo in
+                if !nuevo { ultimaActualizacion = .now }
             }
             .refreshable {
                 await viewModel.cargar()
@@ -240,11 +237,7 @@ struct DashboardView: View {
     }
 
     private var gridTarjetasSaldo: some View {
-        let columnas = [GridItem(.flexible(), spacing: TemaEspaciado.m),
-                        GridItem(.flexible(), spacing: TemaEspaciado.m),
-                        GridItem(.flexible(), spacing: TemaEspaciado.m),
-                        GridItem(.flexible(), spacing: TemaEspaciado.m)]
-        return LazyVGrid(columns: columnas, spacing: TemaEspaciado.m) {
+        HStack(spacing: TemaEspaciado.m) {
             TarjetaSaldo(
                 titulo: LocalizableKey.dashboardSaldoTotal.localized(),
                 monto: viewModel.resumen.balanceTotal,
@@ -427,29 +420,33 @@ struct DashboardView: View {
                         .font(Tipografia.cuerpo())
                         .foregroundColor(AppColor.subtext1)
                 }
-                let columnas = [GridItem(.flexible(), spacing: TemaEspaciado.s),
-                                GridItem(.flexible(), spacing: TemaEspaciado.s),
-                                GridItem(.flexible(), spacing: TemaEspaciado.s),
-                                GridItem(.flexible(), spacing: TemaEspaciado.s)]
-                LazyVGrid(columns: columnas, spacing: TemaEspaciado.s) {
-                    ForEach(viewModel.inventario) { item in
-                        HStack {
-                            Text("$\(item.denominacion)")
-                                .font(Tipografia.subtitulo())
-                                .foregroundColor(AppColor.text)
-                            Spacer()
-                            Text("× \(item.cantidad)")
-                                .font(Tipografia.montoMediano())
-                                .foregroundColor(AppColor.green)
+                if !viewModel.inventario.isEmpty {
+                    let items = viewModel.inventario
+                    let paso = 4
+                    VStack(spacing: TemaEspaciado.s) {
+                        ForEach(Array(stride(from: 0, to: items.count, by: paso).enumerated()), id: \.offset) { _, start in
+                            let chunk = items[start..<min(start + paso, items.count)]
+                            HStack(spacing: TemaEspaciado.s) {
+                                ForEach(chunk) { item in
+                                    HStack {
+                                        Text("$\(item.denominacion)")
+                                            .font(Tipografia.subtitulo())
+                                            .foregroundColor(AppColor.text)
+                                        Spacer()
+                                        Text("× \(item.cantidad)")
+                                            .font(Tipografia.montoMediano())
+                                            .foregroundColor(AppColor.green)
+                                    }
+                                    .padding(TemaEspaciado.s)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: TemaRadio.s)
+                                            .fill(AppColor.surface0)
+                                    )
+                                }
+                            }
                         }
-                        .padding(TemaEspaciado.s)
-                        .background(
-                            RoundedRectangle(cornerRadius: TemaRadio.s)
-                                .fill(AppColor.surface0)
-                        )
                     }
-                }
-                if viewModel.inventario.isEmpty {
+                } else {
                     Text(LocalizableKey.dashboardInventarioVacio.localized())
                         .font(Tipografia.cuerpo())
                         .foregroundColor(AppColor.subtext0)

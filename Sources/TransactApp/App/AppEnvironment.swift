@@ -25,6 +25,9 @@ public final class AppEnvironment: ObservableObject {
     public let simuladorGastosService: SimuladorGastosService
     public let errorPresenter: ErrorPresenter
 
+    public let supabaseManager: SupabaseManager
+    public let syncService: SyncService
+
     public private(set) var observador: DatabaseObserver
     private var observadorTask: Task<Void, Never>?
     private var observadorHandler: (@MainActor () async -> Void)?
@@ -75,6 +78,10 @@ public final class AppEnvironment: ObservableObject {
         )
         self.simuladorGastosService = SimuladorGastosService()
         self.errorPresenter = ErrorPresenter.shared
+
+        let supabase = SupabaseManager()
+        self.supabaseManager = supabase
+        self.syncService = SyncService(manager: database, supabase: supabase)
         // Escucha la notificación global para re-suscribir la observación
         // después de operaciones que cierran/reabren la dbQueue (p.ej.
         // `BackupService.restaurar`).

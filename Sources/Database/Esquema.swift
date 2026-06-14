@@ -2,6 +2,13 @@ import Foundation
 import GRDB
 
 public enum EsquemaColumnas {
+    public struct SyncCol {
+        public static let uuid = "uuid"
+        public static let updatedAt = "updated_at"
+        public static let syncStatus = "sync_status"
+        public static let isDeleted = "is_deleted"
+    }
+
     public enum Transaccion {
         public static let tabla = "Transacciones"
         public static let id = "id"
@@ -13,6 +20,10 @@ public enum EsquemaColumnas {
         public static let categoria = "categoria"
         public static let metodo = "metodo"
         public static let desglose = "desglose"
+        public static let uuid = SyncCol.uuid
+        public static let updatedAt = SyncCol.updatedAt
+        public static let syncStatus = SyncCol.syncStatus
+        public static let isDeleted = SyncCol.isDeleted
     }
 
     public enum Inventario {
@@ -20,6 +31,10 @@ public enum EsquemaColumnas {
         public static let denominacion = "denominacion"
         public static let cantidad = "cantidad"
         public static let actualizadoEn = "actualizadoEn"
+        public static let uuid = SyncCol.uuid
+        public static let updatedAt = SyncCol.updatedAt
+        public static let syncStatus = SyncCol.syncStatus
+        public static let isDeleted = SyncCol.isDeleted
     }
 
     public enum Prestamo {
@@ -33,6 +48,10 @@ public enum EsquemaColumnas {
         public static let afectaBalance = "afectaBalance"
         public static let montoPagado = "montoPagado"
         public static let notas = "notas"
+        public static let uuid = SyncCol.uuid
+        public static let updatedAt = SyncCol.updatedAt
+        public static let syncStatus = SyncCol.syncStatus
+        public static let isDeleted = SyncCol.isDeleted
     }
 
     public enum Suscripcion {
@@ -49,6 +68,10 @@ public enum EsquemaColumnas {
         public static let duracionMeses = "duracionMeses"
         public static let activa = "activa"
         public static let notificado = "notificado"
+        public static let uuid = SyncCol.uuid
+        public static let updatedAt = SyncCol.updatedAt
+        public static let syncStatus = SyncCol.syncStatus
+        public static let isDeleted = SyncCol.isDeleted
     }
 
     public enum SaldoInicial {
@@ -58,6 +81,10 @@ public enum EsquemaColumnas {
         public static let tarjeta = "tarjeta"
         public static let fechaCreacion = "fechaCreacion"
         public static let inventarioJson = "inventarioJson"
+        public static let uuid = SyncCol.uuid
+        public static let updatedAt = SyncCol.updatedAt
+        public static let syncStatus = SyncCol.syncStatus
+        public static let isDeleted = SyncCol.isDeleted
     }
 
     public enum Metadata {

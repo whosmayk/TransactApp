@@ -14,6 +14,17 @@ struct TransaccionRecord: Codable, FetchableRecord, MutablePersistableRecord {
     var categoria: String
     var metodo: String
     var desglose: String?
+    var uuid: String
+    var updatedAt: Int64
+    var syncStatus: Int
+    var isDeleted: Int
+
+    enum CodingKeys: String, CodingKey {
+        case id, fecha, hora, concepto, monto, tipo, categoria, metodo, desglose, uuid
+        case updatedAt = "updated_at"
+        case syncStatus = "sync_status"
+        case isDeleted = "is_deleted"
+    }
 
     init(
         id: Int64? = nil,
@@ -24,7 +35,11 @@ struct TransaccionRecord: Codable, FetchableRecord, MutablePersistableRecord {
         tipo: String,
         categoria: String,
         metodo: String,
-        desglose: String? = nil
+        desglose: String? = nil,
+        uuid: String? = nil,
+        updatedAt: Int64 = Date().epochMillis,
+        syncStatus: Int = 0,
+        isDeleted: Int = 0
     ) {
         self.id = id
         self.fecha = fecha
@@ -35,6 +50,10 @@ struct TransaccionRecord: Codable, FetchableRecord, MutablePersistableRecord {
         self.categoria = categoria
         self.metodo = metodo
         self.desglose = desglose
+        self.uuid = uuid ?? UUID().uuidString.lowercased()
+        self.updatedAt = updatedAt
+        self.syncStatus = syncStatus
+        self.isDeleted = isDeleted
     }
 
     mutating func didInsert(_ inserted: InsertionSuccess) {
@@ -57,6 +76,10 @@ struct TransaccionRecord: Codable, FetchableRecord, MutablePersistableRecord {
         } else {
             self.desglose = nil
         }
+        self.uuid = transaccion.uuid
+        self.updatedAt = transaccion.updatedAt.epochMillis
+        self.syncStatus = 0
+        self.isDeleted = transaccion.isDeleted ? 1 : 0
     }
 
     func aModelo() -> Transaccion? {
@@ -80,28 +103,54 @@ struct TransaccionRecord: Codable, FetchableRecord, MutablePersistableRecord {
             tipo: tipoEnum,
             categoria: categoria,
             metodo: metodoEnum,
-            desglose: desgloseStruct
+            desglose: desgloseStruct,
+            uuid: uuid,
+            updatedAt: Date(epochMillis: updatedAt),
+            isDeleted: isDeleted != 0
         )
     }
 }
 
-struct InventarioRecord: Codable, FetchableRecord, PersistableRecord {
+struct InventarioRecord: FetchableRecord, MutablePersistableRecord, Codable {
     static let databaseTableName = EsquemaColumnas.Inventario.tabla
 
     var denominacion: Int
     var cantidad: Int
     var actualizadoEn: String
+    var updatedAt: Int64
+    var syncStatus: Int
+    var isDeleted: Int
 
-    init(denominacion: Int, cantidad: Int, actualizadoEn: String) {
+    enum CodingKeys: String, CodingKey {
+        case denominacion, cantidad, actualizadoEn
+        case updatedAt = "updated_at"
+        case syncStatus = "sync_status"
+        case isDeleted = "is_deleted"
+    }
+
+    init(
+        denominacion: Int,
+        cantidad: Int,
+        actualizadoEn: String,
+        updatedAt: Int64 = Date().epochMillis,
+        syncStatus: Int = 0,
+        isDeleted: Int = 0
+    ) {
         self.denominacion = denominacion
         self.cantidad = cantidad
         self.actualizadoEn = actualizadoEn
+        self.updatedAt = updatedAt
+        self.syncStatus = syncStatus
+        self.isDeleted = isDeleted
     }
 
     init(_ inventario: Inventario) {
         self.denominacion = inventario.denominacion
         self.cantidad = inventario.cantidad
         self.actualizadoEn = FormatoFecha.formatearFechaHora(inventario.actualizadoEn)
+        self.updatedAt = Date().epochMillis
+        self.syncStatus = 0
+        self.isDeleted = 0
     }
 
     func aModelo() -> Inventario? {
@@ -122,6 +171,17 @@ struct PrestamoRecord: Codable, FetchableRecord, MutablePersistableRecord {
     var afectaBalance: Int
     var montoPagado: Int64
     var notas: String?
+    var uuid: String
+    var updatedAt: Int64
+    var syncStatus: Int
+    var isDeleted: Int
+
+    enum CodingKeys: String, CodingKey {
+        case id, persona, concepto, monto, tipo, fecha, afectaBalance, montoPagado, notas, uuid
+        case updatedAt = "updated_at"
+        case syncStatus = "sync_status"
+        case isDeleted = "is_deleted"
+    }
 
     init(
         id: Int64? = nil,
@@ -132,7 +192,11 @@ struct PrestamoRecord: Codable, FetchableRecord, MutablePersistableRecord {
         fecha: String,
         afectaBalance: Int,
         montoPagado: Int64 = 0,
-        notas: String? = nil
+        notas: String? = nil,
+        uuid: String? = nil,
+        updatedAt: Int64 = Date().epochMillis,
+        syncStatus: Int = 0,
+        isDeleted: Int = 0
     ) {
         self.id = id
         self.persona = persona
@@ -143,6 +207,10 @@ struct PrestamoRecord: Codable, FetchableRecord, MutablePersistableRecord {
         self.afectaBalance = afectaBalance
         self.montoPagado = montoPagado
         self.notas = notas
+        self.uuid = uuid ?? UUID().uuidString.lowercased()
+        self.updatedAt = updatedAt
+        self.syncStatus = syncStatus
+        self.isDeleted = isDeleted
     }
 
     mutating func didInsert(_ inserted: InsertionSuccess) {
@@ -159,6 +227,10 @@ struct PrestamoRecord: Codable, FetchableRecord, MutablePersistableRecord {
         self.afectaBalance = prestamo.afectaBalance ? 1 : 0
         self.montoPagado = prestamo.montoPagado.centavos
         self.notas = prestamo.notas
+        self.uuid = prestamo.uuid
+        self.updatedAt = prestamo.updatedAt.epochMillis
+        self.syncStatus = 0
+        self.isDeleted = prestamo.isDeleted ? 1 : 0
     }
 
     func aModelo() -> Prestamo? {
@@ -173,7 +245,10 @@ struct PrestamoRecord: Codable, FetchableRecord, MutablePersistableRecord {
             fecha: fechaDate,
             afectaBalance: afectaBalance != 0,
             montoPagado: montoPagado.aDecimal,
-            notas: notas
+            notas: notas,
+            uuid: uuid,
+            updatedAt: Date(epochMillis: updatedAt),
+            isDeleted: isDeleted != 0
         )
     }
 }
@@ -194,6 +269,18 @@ struct SuscripcionRecord: Codable, FetchableRecord, MutablePersistableRecord {
     var metodoPago: String
     var activa: Int
     var notificado: Int
+    var uuid: String
+    var updatedAt: Int64
+    var syncStatus: Int
+    var isDeleted: Int
+
+    enum CodingKeys: String, CodingKey {
+        case id, concepto, monto, categoria, frecuencia, tipo, fechaInicio, proximoCobro
+        case notas, duracionMeses, metodoPago, activa, notificado, uuid
+        case updatedAt = "updated_at"
+        case syncStatus = "sync_status"
+        case isDeleted = "is_deleted"
+    }
 
     init(
         id: Int64? = nil,
@@ -208,7 +295,11 @@ struct SuscripcionRecord: Codable, FetchableRecord, MutablePersistableRecord {
         duracionMeses: Int? = nil,
         metodoPago: String = "Tarjeta",
         activa: Int = 1,
-        notificado: Int = 0
+        notificado: Int = 0,
+        uuid: String? = nil,
+        updatedAt: Int64 = Date().epochMillis,
+        syncStatus: Int = 0,
+        isDeleted: Int = 0
     ) {
         self.id = id
         self.concepto = concepto
@@ -223,6 +314,10 @@ struct SuscripcionRecord: Codable, FetchableRecord, MutablePersistableRecord {
         self.metodoPago = metodoPago
         self.activa = activa
         self.notificado = notificado
+        self.uuid = uuid ?? UUID().uuidString.lowercased()
+        self.updatedAt = updatedAt
+        self.syncStatus = syncStatus
+        self.isDeleted = isDeleted
     }
 
     mutating func didInsert(_ inserted: InsertionSuccess) {
@@ -243,6 +338,10 @@ struct SuscripcionRecord: Codable, FetchableRecord, MutablePersistableRecord {
         self.metodoPago = s.metodoPago.rawValue
         self.activa = s.activa ? 1 : 0
         self.notificado = s.notificado ? 1 : 0
+        self.uuid = s.uuid
+        self.updatedAt = s.updatedAt.epochMillis
+        self.syncStatus = 0
+        self.isDeleted = s.isDeleted ? 1 : 0
     }
 
     func aModelo() -> Suscripcion? {
@@ -266,7 +365,10 @@ struct SuscripcionRecord: Codable, FetchableRecord, MutablePersistableRecord {
             duracionMeses: duracionMeses.flatMap { $0 > 0 ? $0 : nil },
             metodoPago: metodoPagoEnum,
             activa: activa != 0,
-            notificado: notificado != 0
+            notificado: notificado != 0,
+            uuid: uuid,
+            updatedAt: Date(epochMillis: updatedAt),
+            isDeleted: isDeleted != 0
         )
     }
 }
@@ -279,13 +381,38 @@ struct SaldoInicialRecord: Codable, FetchableRecord, PersistableRecord {
     var tarjeta: Int64
     var fechaCreacion: String
     var inventarioJson: String
+    var uuid: String
+    var updatedAt: Int64
+    var syncStatus: Int
+    var isDeleted: Int
 
-    init(id: Int = 1, efectivo: Int64, tarjeta: Int64, fechaCreacion: String, inventarioJson: String) {
+    enum CodingKeys: String, CodingKey {
+        case id, efectivo, tarjeta, fechaCreacion, inventarioJson, uuid
+        case updatedAt = "updated_at"
+        case syncStatus = "sync_status"
+        case isDeleted = "is_deleted"
+    }
+
+    init(
+        id: Int = 1,
+        efectivo: Int64,
+        tarjeta: Int64,
+        fechaCreacion: String,
+        inventarioJson: String,
+        uuid: String? = nil,
+        updatedAt: Int64 = Date().epochMillis,
+        syncStatus: Int = 0,
+        isDeleted: Int = 0
+    ) {
         self.id = id
         self.efectivo = efectivo
         self.tarjeta = tarjeta
         self.fechaCreacion = fechaCreacion
         self.inventarioJson = inventarioJson
+        self.uuid = uuid ?? UUID().uuidString.lowercased()
+        self.updatedAt = updatedAt
+        self.syncStatus = syncStatus
+        self.isDeleted = isDeleted
     }
 
     init(_ s: SaldoInicial, inventario: [Inventario]) {
@@ -300,6 +427,10 @@ struct SaldoInicialRecord: Codable, FetchableRecord, PersistableRecord {
         } else {
             self.inventarioJson = "[]"
         }
+        self.uuid = UUID().uuidString.lowercased()
+        self.updatedAt = Date().epochMillis
+        self.syncStatus = 0
+        self.isDeleted = 0
     }
 
     func aModelo() -> SaldoInicial? {
@@ -340,3 +471,17 @@ extension Int64 {
         Decimal(self) / 100
     }
 }
+
+// MARK: - Sync helpers
+
+extension Date {
+    public var epochMillis: Int64 {
+        Int64(self.timeIntervalSince1970 * 1000)
+    }
+
+    public init(epochMillis: Int64) {
+        self = Date(timeIntervalSince1970: TimeInterval(epochMillis) / 1000)
+    }
+}
+
+let syncMetaKey = "last_synced_at_millis"

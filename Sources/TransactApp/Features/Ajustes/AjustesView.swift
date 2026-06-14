@@ -14,6 +14,7 @@ public struct AjustesView: View {
 
     public enum Tab: String, CaseIterable, Identifiable {
         case configuracion
+        case sync
         case respaldos
         case limpiar
         case diagnostico
@@ -21,7 +22,8 @@ public struct AjustesView: View {
 
         public var titulo: String {
             switch self {
-            case .configuracion: return LocalizableKey.tabConfiguracion.localized()
+            case .configuracion: return "Ajustes"
+            case .sync: return "☁️ Nube"
             case .respaldos: return LocalizableKey.tabRespaldos.localized()
             case .limpiar: return LocalizableKey.tabLimpiar.localized()
             case .diagnostico: return LocalizableKey.tabDiagnostico.localized()
@@ -106,6 +108,8 @@ public struct AjustesView: View {
         switch tab {
         case .configuracion:
             ConfiguracionView(viewModel: configuracionViewModel)
+        case .sync:
+            SyncSettingsView()
         case .respaldos:
             RespaldoView(viewModel: respaldoViewModel)
         case .limpiar:

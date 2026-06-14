@@ -115,30 +115,38 @@ final class DashboardViewModel: ObservableObject {
                     notifTask
                 )
 
-            self.inventario = inventario
-            self.prestamos = prestamos
-            self.suscripciones = suscripciones
-            self.notificaciones = notifs
-            self.resumen = CalculosFinancieros.resumen(
+            let resumen = CalculosFinancieros.resumen(
                 saldoInicial: saldoInicial,
                 transacciones: transacciones,
                 prestamos: prestamos
             )
             let transaccionesMes = transaccionesDelMesActual(transacciones)
-            self.ingresosMes = transaccionesMes
+            let ingresosMes = transaccionesMes
                 .filter { $0.tipo == .ingreso }
                 .reduce(into: Decimal(0)) { $0 += $1.monto }
             let gastosMesAbs = transaccionesMes
                 .filter { $0.tipo == .gasto }
                 .reduce(into: Decimal(0)) { $0 += $1.monto }
-            self.gastosMesFirmado = -gastosMesAbs
-            self.ingresosHistorico = transacciones
+            let ingresosHistorico = transacciones
                 .filter { $0.tipo == .ingreso }
                 .reduce(into: Decimal(0)) { $0 += $1.monto }
             let gastosHistAbs = transacciones
                 .filter { $0.tipo == .gasto }
                 .reduce(into: Decimal(0)) { $0 += $1.monto }
-            self.gastosHistoricoFirmado = -gastosHistAbs
+
+            var t = Transaction()
+            t.disablesAnimations = true
+            withTransaction(t) {
+                self.inventario = inventario
+                self.prestamos = prestamos
+                self.suscripciones = suscripciones
+                self.notificaciones = notifs
+                self.resumen = resumen
+                self.ingresosMes = ingresosMes
+                self.gastosMesFirmado = -gastosMesAbs
+                self.ingresosHistorico = ingresosHistorico
+                self.gastosHistoricoFirmado = -gastosHistAbs
+            }
         } catch {
             self.error = error.localizedDescription
         }

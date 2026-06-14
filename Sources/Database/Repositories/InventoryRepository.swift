@@ -37,7 +37,7 @@ public final class SQLiteInventoryRepository: InventoryRepository, @unchecked Se
 
     public func upsert(_ inventario: Inventario) async throws {
         try await manager.escribir { db in
-            let record = InventarioRecord(inventario)
+            var record = InventarioRecord(inventario)
             try record.save(db)
         }
     }

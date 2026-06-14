@@ -28,6 +28,9 @@ struct TransactApp: App {
                 busquedaGlobal: busquedaGlobal
             )
             .environmentObject(navegacion)
+            .onOpenURL { url in
+                Task { await root.handleURL(url) }
+            }
             .task { await updater.checkSilencioso() }
         }
         .commands {

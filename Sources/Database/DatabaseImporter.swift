@@ -127,7 +127,7 @@ public enum DatabaseImporter {
 
     private static func importarInventario(origen: Database, dest: Database) throws {
         let filas = try InventarioRecord.fetchAll(origen)
-        for fila in filas {
+        for var fila in filas {
             try fila.insert(dest, onConflict: .replace)
         }
     }

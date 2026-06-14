@@ -1,6 +1,6 @@
 import Foundation
 
-public struct Prestamo: Identifiable, Codable, Equatable, Sendable {
+public struct Prestamo: Identifiable, Codable, Equatable, Sendable, Syncable {
     public var id: Int64?
     public var persona: String
     public var concepto: String
@@ -10,6 +10,9 @@ public struct Prestamo: Identifiable, Codable, Equatable, Sendable {
     public var afectaBalance: Bool
     public var montoPagado: Decimal
     public var notas: String?
+    public var uuid: String
+    public var updatedAt: Date
+    public var isDeleted: Bool
 
     public init(
         id: Int64? = nil,
@@ -20,7 +23,10 @@ public struct Prestamo: Identifiable, Codable, Equatable, Sendable {
         fecha: Date,
         afectaBalance: Bool = false,
         montoPagado: Decimal = 0,
-        notas: String? = nil
+        notas: String? = nil,
+        uuid: String? = nil,
+        updatedAt: Date = Date(),
+        isDeleted: Bool = false
     ) {
         self.id = id
         self.persona = persona
@@ -31,6 +37,9 @@ public struct Prestamo: Identifiable, Codable, Equatable, Sendable {
         self.afectaBalance = afectaBalance
         self.montoPagado = montoPagado
         self.notas = notas
+        self.uuid = uuid ?? Self.generarUUID()
+        self.updatedAt = updatedAt
+        self.isDeleted = isDeleted
     }
 
     public var saldoPendiente: Decimal {

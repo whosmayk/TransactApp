@@ -85,10 +85,19 @@ final class RootCoordinator: ObservableObject {
             let env = try AppEnvironment.bootstrap()
             self.environment = env
             busquedaGlobal.configurar(service: env.busquedaGlobalService)
+
+            // Intentar restaurar sesión de Supabase
+            env.syncService.restaurarSesion()
+
             let existe = try await env.initialBalance.obtener() != nil
             if existe {
                 configurarDashboard(env: env)
                 self.estado = .dashboard
+                // Sincronización inicial en segundo plano
+                Task {
+                    await env.syncService.pullChanges()
+                    await env.syncService.pushChanges()
+                }
             } else {
                 let vm = SaldoInicialViewModel(
                     repo: env.initialBalance,
@@ -169,6 +178,34 @@ final class RootCoordinator: ObservableObject {
         await vm.cargar()
         await proyeccionViewModel?.cargar()
         await simuladorViewModel?.cargarContexto()
+    }
+
+    func handleURL(_ url: URL) async {
+        guard let env = environment,
+              url.scheme == "transactapp",
+              let fragment = url.fragment(percentEncoded: false),
+              let params = parseFragment(fragment),
+              let accessToken = params["access_token"],
+              let refreshToken = params["refresh_token"] else { return }
+
+        env.supabaseManager.token = accessToken
+        env.syncService.autenticado = true
+        let sesion = SupabaseSession(accessToken: accessToken, refreshToken: refreshToken, expiresAt: 0)
+        if let data = try? JSONEncoder().encode(sesion) {
+            UserDefaults.standard.set(data, forKey: "supabase_session")
+        }
+        await env.syncService.pullChanges()
+        await env.syncService.pushChanges()
+    }
+
+    private func parseFragment(_ fragment: String) -> [String: String]? {
+        var params: [String: String] = [:]
+        for pair in fragment.split(separator: "&") {
+            let kv = pair.split(separator: "=", maxSplits: 1)
+            guard kv.count == 2 else { continue }
+            params[String(kv[0])] = String(kv[1])
+        }
+        return params.isEmpty ? nil : params
     }
 }
 
