@@ -63,3 +63,6 @@ screenshots/
 # Developer utilities
 /scripts/cargar-demo.swift
 /scripts/run-app.sh
+
+# Environment variables (secrets)
+.env
